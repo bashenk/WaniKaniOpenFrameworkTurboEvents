@@ -2,7 +2,7 @@
 // @name        Wanikani Open Framework Turbo Events
 // @namespace   https://greasyfork.org/en/users/11878
 // @description Adds helpful methods for dealing with Turbo Events to WaniKani Open Framework
-// @version     1.1.1
+// @version     1.1.2
 // @match       https://www.wanikani.com/*
 // @match       https://preview.wanikani.com/*
 // @author      Inserio
