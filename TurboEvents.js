@@ -84,10 +84,10 @@
     //------------------------------
     const internal_handlers = {};
     const event_handlers = {};
-    function addEventListener(eventNames, handler) {
-        if (!Array.isArray(handler.urls)) handler.urls = [handler.urls];
+    function addEventListener(eventNames, listener) {
+        if (!Array.isArray(listener.urls)) listener.urls = [listener.urls];
         if (!Array.isArray(eventNames)) eventNames = [eventNames];
-        handler.urls = handler.urls.map((url) => {
+        listener.urls = listener.urls.map((url) => {
             if (url instanceof RegExp) return url;
             if (typeof url !== 'string') return null;
             return new RegExp(url.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replaceAll('*','.*'));
@@ -106,10 +106,10 @@
                 document.documentElement.addEventListener(eventName, internal_handlers[eventName] = handleEvent);
             if (!event_handlers[eventName])
                 event_handlers[eventName] = new Set();
-            event_handlers[eventName].add(handler);
-            result[eventName] = handler;
-            if (eventName === 'load' && typeof handler.callback === 'function' && handler.urls?.length > 0 && handler.urls.find(url => url.test(lastUrl)))
-                handler.callback();
+            event_handlers[eventName].add(listener);
+            result[eventName] = listener;
+            if (eventName === 'load' && typeof listener.callback === 'function' && listener.urls?.length > 0 && listener.urls.find(url => url.test(lastUrl)))
+                listener.callback();
         }
         result.remove = function() { eventNames.forEach(eventName => wkof.turbo.remove_event_listener(eventName, this[eventName])); }
         return result;
