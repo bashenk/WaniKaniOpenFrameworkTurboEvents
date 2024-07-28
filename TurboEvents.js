@@ -2,7 +2,7 @@
 // @name        Wanikani Open Framework Turbo Events
 // @namespace   https://greasyfork.org/en/users/11878
 // @description Adds helpful methods for dealing with Turbo Events to WaniKani Open Framework
-// @version     1.1.0
+// @version     1.1.1
 // @match       https://www.wanikani.com/*
 // @match       https://preview.wanikani.com/*
 // @author      Inserio
@@ -13,12 +13,10 @@
 // ==/UserScript==
 /* global wkof */
 /* jshint esversion: 11 */
- 
+
 (function() {
     'use strict';
- 
-    const version = "1.0.1";
- 
+
     // https://turbo.hotwired.dev/reference/events
     const turboEvents = Object.freeze({
         click:                  {source: 'document', name: 'turbo:click'},
@@ -44,7 +42,7 @@
         before_prefetch:        {source: 'httpRequests', name: 'turbo:before-prefetch'},
         fetch_request_error:    {source: 'httpRequests', name: 'turbo:fetch-request-error'},
     });
- 
+
     const eventMap = Object.freeze({
         events:                 function on_events(eventList, callback, urls) { return addEventListener(eventList, {callback, urls}); },
         click:                  function on_click(callback, urls) { return addEventListener(turboEvents.click.name, {callback, urls}); },
@@ -70,22 +68,17 @@
         before_prefetch:        function on_before_prefetch(callback, urls) { return addEventListener(turboEvents.before_prefetch.name, {callback, urls}); },
         fetch_request_error:    function on_fetch_request_error(callback, urls) { return addEventListener(turboEvents.fetch_request_error.name, {callback, urls}); },
     });
- 
+
     const publishedInterface= {
         add_event_listener: addEventListener,
         remove_event_listener: removeEventListener,
- 
+
         on: eventMap,
         events: turboEvents,
- 
-        version: {
-            value: version,
-            compare_to: wkof.version.compare_to,    // compare_version(version)
-        }
     };
- 
+
     let lastUrlLoaded = document.URL;
- 
+
     //------------------------------
     // Add handlers for all events.
     //------------------------------
@@ -104,15 +97,15 @@
             if (typeof event === 'object' && event.name) return event.name;
             return null;
         }).filter(event => event !== null);
- 
+
         const result = {};
         const lastUrl = lastUrlLoaded;
         for (let i = 0; i < eventNames.length; i++){
             const eventName = eventNames[i];
-            if (!internal_handlers[eventName]) {
+            if (!internal_handlers[eventName])
                 document.documentElement.addEventListener(eventName, internal_handlers[eventName] = handleEvent);
-            }
-            if (!event_handlers[eventName]) event_handlers[eventName] = new Set();
+            if (!event_handlers[eventName])
+                event_handlers[eventName] = new Set();
             event_handlers[eventName].add(handler);
             result[eventName] = handler;
             if (eventName === 'load' && typeof handler.callback === 'function' && handler.urls?.length > 0 && handler.urls.find(url => url.test(lastUrl)))
@@ -121,7 +114,7 @@
         result.remove = function() { eventNames.forEach(eventName => wkof.turbo.remove_event_listener(eventName, this[eventName])); }
         return result;
     }
- 
+
     function removeEventListener(eventName, listener) {
         if (typeof eventName === 'object' && eventName.name) eventName = eventName.name;
         else if (typeof eventName !== 'string') return false;
@@ -133,7 +126,7 @@
         }
         return false;
     }
- 
+
     //------------------------------
     // Call event handlers.
     //------------------------------
@@ -146,10 +139,10 @@
             if (typeof handler.callback === 'function') handler.callback(event);
         }
     }
- 
+
     function addTurboEvents() {
         wkof.turbo = publishedInterface;
- 
+
         [wkof.turbo.events.click,
             wkof.turbo.events.before_visit,
             wkof.turbo.events.visit,
@@ -162,7 +155,7 @@
                 handleEvent(event);
             });
         });
- 
+
         document.documentElement.addEventListener(wkof.turbo.events.before_render.name, internal_handlers[turboEvents.before_render.name] = event => {
             lastUrlLoaded = event.target?.baseURI ?? document.URL;
             let observer = new MutationObserver(m => {
@@ -173,14 +166,14 @@
             });
             observer.observe(event.detail.newBody, {childList: true});
         });
- 
+
     }
- 
+
     // it seems like Turbo does not move the SVG element into document.body, so let's ignore it
     function relevantRootElementChildren(rootElement) {
         return [...rootElement?.children ?? []].filter(c => c.tagName !== `svg`);
     }
- 
+
     function startup() {
         if (!window.wkof) {
             const response = confirm('WaniKani Open Framework Additional Filters requires WaniKani Open Framework.\n Click "OK" to be forwarded to installation instructions.');
@@ -191,11 +184,11 @@
             .then(addTurboEvents)
             .then(turboEventsReady);
     }
- 
+
     function turboEventsReady() {
         wkof.set_state('wkof.TurboEvents', 'ready');
     }
- 
+
     startup();
- 
+
 })();
