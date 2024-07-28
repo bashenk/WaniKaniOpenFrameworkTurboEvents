@@ -4,7 +4,113 @@ Library script that adds helpful methods to [WaniKani Open Framework](https://co
 
 All additions are added to a new `turbo` property of the `wkof` object, thus accessible via `wkof.turbo`.
 
-### Example usage:
+### Basic exposed object
+
+#### The `wkof.turbo` object
+The `wkof.turbo` object has the following properties and methods:
+- `on`
+  - `events(eventList, callback, urls)`
+  - `click(callback, urls)`
+  - `before_visit(callback, urls)`
+  - `visit(callback, urls)`
+  - `before_cache(callback, urls)`
+  - `before_render(callback, urls)`
+  - `render(callback, urls)`
+  - `load(callback, urls)`
+  - `morph(callback, urls)`
+  - `before_morph_element(callback, urls)`
+  - `before_morph_attribute(callback, urls)`
+  - `morph_element(callback, urls)`
+  - `submit_start(callback, urls)`
+  - `submit_end(callback, urls)`
+  - `before_frame_render(callback, urls)`
+  - `frame_render(callback, urls)`
+  - `frame_load(callback, urls)`
+  - `frame_missing(callback, urls)`
+  - `before_stream_render(callback, urls)`
+  - `before_fetch_request(callback, urls)`
+  - `before_fetch_response(callback, urls)`
+  - `before_prefetch(callback, urls)`
+  - `fetch_request_error(callback, urls)`
+- `events`
+  - `click`
+    - `source: 'document'`
+    - `name: 'turbo:click'`
+  - `before_visit`
+    - `source: 'document'`
+    - `name: 'turbo:before-visit'`
+  - `visit`
+    - `source: 'document'`
+    - `name: 'turbo:visit'`
+  - `before_cache`
+    - `source: 'document'`
+    - `name: 'turbo:before-cache'`
+  - `before_render`
+    - `source: 'document'`
+    - `name: 'turbo:before-render'`
+  - `render`
+    - `source: 'document'`
+    - `name: 'turbo:render'`
+  - `load`
+    - `source: 'document'`
+    - `name: 'turbo:load'`
+  - `morph`
+    - `source: 'pageRefresh'`
+    - `name: 'turbo:morph'`
+  - `before_morph_element`
+    - `source: 'pageRefresh'`
+    - `name: 'turbo:before-morph-element'`
+  - `before_morph_attribute`
+    - `source: 'pageRefresh'`
+    - `name: 'turbo:before-morph-attribute'`
+  - `morph_element`
+    - `source: 'pageRefresh'`
+    - `name: 'turbo:morph-element'`
+  - `submit_start`
+    - `source: 'forms'`
+    - `name: 'turbo:submit-start'`
+  - `submit_end`
+    - `source: 'forms'`
+    - `name: 'turbo:submit-end'`
+  - `before_frame_render`
+    - `source: 'frames'`
+    - `name: 'turbo:before-frame-render'`
+  - `frame_render`
+    - `source: 'frames'`
+    - `name: 'turbo:frame-render'`
+  - `frame_load`
+    - `source: 'frames'`
+    - `name: 'turbo:frame-load'`
+  - `frame_missing`
+    - `source: 'frames'`
+    - `name: 'turbo:frame-missing'`
+  - `before_stream_render`
+    - `source: 'streams'`
+    - `name: 'turbo:before-stream-render'`
+  - `before_fetch_request`
+    - `source: 'httpRequests'`
+    - `name: 'turbo:before-fetch-request'`
+  - `before_fetch_response`
+    - `source: 'httpRequests'`
+    - `name: 'turbo:before-fetch-response'`
+  - `before_prefetch`
+    - `source: 'httpRequests'`
+    - `name: 'turbo:before-prefetch'`
+  - `fetch_request_error`
+    - `source: 'httpRequests'`
+    - `name: 'turbo:fetch-request-error'`
+- `add_event_listener(eventNames, listener)`
+- `remove_event_listener(eventName, listener)`
+
+### General Notes
+
+#### Whenever a specific URL is required
+1. Pass one or more URLs to the method in `wkof.turbo.on` that will be used. 
+   - URL inputs can be a `string`, a `RegExp`, or an array consisting of a mixture of those.
+2. Set the `@match` userscript directive to `https://www.wanikani.com/*` or equivalent.
+   - Otherwise, the script may not end up running if the user refreshes the page somewhere unexpected.
+
+### Example usage
 
 ```javascript
 // Make sure the events are fully loaded before starting your configuration.
