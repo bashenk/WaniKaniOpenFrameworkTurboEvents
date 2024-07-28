@@ -116,8 +116,9 @@ The `wkof.turbo` object has the following properties and methods:
 // Make sure the events are fully loaded before starting your configuration.
 wkof.ready('TurboEvents').then(configurePageHandler);
 
-// The callback function can accept an event argument (if desired), which will be provided in all turbo events
-// I.e., it will not be provided in the 'load' event (not to be confused with the 'turbo:load' event), if used.
+// The callback function can accept an event argument (if desired), which will be provided in all turbo
+// events I.e., it will not be provided in the 'load' event (not to be confused with the 'turbo:load'
+// event), if used.
 function callbackFunction(event) {
     console.log(`callbackFunction() has run for event "${event?.type}"`);
 }
@@ -128,7 +129,7 @@ const dashboardRegex = /https:\/\/www\.wanikani\.com(\/dashboard.*)?\/?$/;
 function configurePageHandler() {
     // Run the callback on turbo:click on any page.
     const onClick = wkof.turbo.on.click(callbackFunction);
-    // The returned object contains a reference to the listener, using the event name as the property name.
+    // Returned object contains a reference to the listener, using the event name as the property name.
     let eventName = wkof.turbo.events.click.name;
     const onClickListener = onClick[eventName]; // alternative: onclick['turbo:click']
 
