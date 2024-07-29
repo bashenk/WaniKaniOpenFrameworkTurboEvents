@@ -2,7 +2,7 @@
 // @name        Wanikani Open Framework Turbo Events
 // @namespace   https://greasyfork.org/en/users/11878
 // @description Adds helpful methods for dealing with Turbo Events to WaniKani Open Framework
-// @version     1.1.2
+// @version     2.0.0
 // @match       https://www.wanikani.com/*
 // @match       https://preview.wanikani.com/*
 // @author      Inserio
@@ -42,137 +42,196 @@
         before_prefetch:        {source: 'httpRequests', name: 'turbo:before-prefetch'},
         fetch_request_error:    {source: 'httpRequests', name: 'turbo:fetch-request-error'},
     });
-
-    const eventMap = Object.freeze({
-        events:                 function on_events(eventList, callback, urls) { return addEventListener(eventList, {callback, urls}); },
-        click:                  function on_click(callback, urls) { return addEventListener(turboEvents.click.name, {callback, urls}); },
-        before_visit:           function on_before_visit(callback, urls) { return addEventListener(turboEvents.before_visit.name, {callback, urls}); },
-        visit:                  function on_visit(callback, urls) { return addEventListener(turboEvents.visit.name, {callback, urls}); },
-        before_cache:           function on_before_cache(callback, urls) { return addEventListener(turboEvents.before_cache.name, {callback, urls}); },
-        before_render:          function on_before_render(callback, urls) { return addEventListener(turboEvents.before_render.name, {callback, urls}); },
-        render:                 function on_render(callback, urls) { return addEventListener(turboEvents.render.name, {callback, urls}); },
-        load:                   function on_load(callback, urls) { return addEventListener(turboEvents.load.name, {callback, urls}); },
-        morph:                  function on_morph(callback, urls) { return addEventListener(turboEvents.morph.name, {callback, urls}); },
-        before_morph_element:   function on_before_morph_element(callback, urls) { return addEventListener(turboEvents.before_morph_element.name, {callback, urls}); },
-        before_morph_attribute: function on_before_morph_attribute(callback, urls) { return addEventListener(turboEvents.before_morph_attribute.name, {callback, urls}); },
-        morph_element:          function on_morph_element(callback, urls) { return addEventListener(turboEvents.morph_element.name, {callback, urls}); },
-        submit_start:           function on_submit_start(callback, urls) { return addEventListener(turboEvents.submit_start.name, {callback, urls}); },
-        submit_end:             function on_submit_end(callback, urls) { return addEventListener(turboEvents.submit_end.name, {callback, urls}); },
-        before_frame_render:    function on_before_frame_render(callback, urls) { return addEventListener(turboEvents.before_frame_render.name, {callback, urls}); },
-        frame_render:           function on_frame_render(callback, urls) { return addEventListener(turboEvents.frame_render.name, {callback, urls}); },
-        frame_load:             function on_frame_load(callback, urls) { return addEventListener(turboEvents.frame_load.name, {callback, urls}); },
-        frame_missing:          function on_frame_missing(callback, urls) { return addEventListener(turboEvents.frame_missing.name, {callback, urls}); },
-        before_stream_render:   function on_before_stream_render(callback, urls) { return addEventListener(turboEvents.before_stream_render.name, {callback, urls}); },
-        before_fetch_request:   function on_before_fetch_request(callback, urls) { return addEventListener(turboEvents.before_fetch_request.name, {callback, urls}); },
-        before_fetch_response:  function on_before_fetch_response(callback, urls) { return addEventListener(turboEvents.before_fetch_response.name, {callback, urls}); },
-        before_prefetch:        function on_before_prefetch(callback, urls) { return addEventListener(turboEvents.before_prefetch.name, {callback, urls}); },
-        fetch_request_error:    function on_fetch_request_error(callback, urls) { return addEventListener(turboEvents.fetch_request_error.name, {callback, urls}); },
+    const turboListeners = Object.freeze({
+        click:                  function on_click(callback, options) { return addEventListener(turboEvents.click.name, callback, options); },
+        before_visit:           function on_before_visit(callback, options) { return addEventListener(turboEvents.before_visit.name, callback, options); },
+        visit:                  function on_visit(callback, options) { return addEventListener(turboEvents.visit.name, callback, options); },
+        before_cache:           function on_before_cache(callback, options) { return addEventListener(turboEvents.before_cache.name, callback, options); },
+        before_render:          function on_before_render(callback, options) { return addEventListener(turboEvents.before_render.name, callback, options); },
+        render:                 function on_render(callback, options) { return addEventListener(turboEvents.render.name, callback, options); },
+        load:                   function on_load(callback, options) { return addEventListener(turboEvents.load.name, callback, options); },
+        morph:                  function on_morph(callback, options) { return addEventListener(turboEvents.morph.name, callback, options); },
+        before_morph_element:   function on_before_morph_element(callback, options) { return addEventListener(turboEvents.before_morph_element.name, callback, options); },
+        before_morph_attribute: function on_before_morph_attribute(callback, options) { return addEventListener(turboEvents.before_morph_attribute.name, callback, options); },
+        morph_element:          function on_morph_element(callback, options) { return addEventListener(turboEvents.morph_element.name, callback, options); },
+        submit_start:           function on_submit_start(callback, options) { return addEventListener(turboEvents.submit_start.name, callback, options); },
+        submit_end:             function on_submit_end(callback, options) { return addEventListener(turboEvents.submit_end.name, callback, options); },
+        before_frame_render:    function on_before_frame_render(callback, options) { return addEventListener(turboEvents.before_frame_render.name, callback, options); },
+        frame_render:           function on_frame_render(callback, options) { return addEventListener(turboEvents.frame_render.name, callback, options); },
+        frame_load:             function on_frame_load(callback, options) { return addEventListener(turboEvents.frame_load.name, callback, options); },
+        frame_missing:          function on_frame_missing(callback, options) { return addEventListener(turboEvents.frame_missing.name, callback, options); },
+        before_stream_render:   function on_before_stream_render(callback, options) { return addEventListener(turboEvents.before_stream_render.name, callback, options); },
+        before_fetch_request:   function on_before_fetch_request(callback, options) { return addEventListener(turboEvents.before_fetch_request.name, callback, options); },
+        before_fetch_response:  function on_before_fetch_response(callback, options) { return addEventListener(turboEvents.before_fetch_response.name, callback, options); },
+        before_prefetch:        function on_before_prefetch(callback, options) { return addEventListener(turboEvents.before_prefetch.name, callback, options); },
+        fetch_request_error:    function on_fetch_request_error(callback, options) { return addEventListener(turboEvents.fetch_request_error.name, callback, options); },
     });
+    const common = {
+        locations: {
+            dashboard: /^https:\/\/www\.wanikani\.com(\/dashboard.*)?\/?$/,
+            items_pages: /^https:\/\/www\.wanikani\.com\/(radicals|kanji|vocabulary)\/.+\/?$/,
+            lessons: /^https:\/\/www\.wanikani\.com\/subject-lessons\/(start|[\d-]+\/\d+)\/?$/,
+            lessons_picker: /^https:\/\/www\.wanikani\.com\/subject-lessons\/picker\/?$/,
+            lessons_quiz: /^https:\/\/www\.wanikani\.com\/subject-lessons\/[\d-]+\/quiz.*\/?$/,
+            reviews: /^https:\/\/www\.wanikani\.com\/subjects\/review.*\/?$/,
+        },
+    }
+    const commonListeners = {
+        events:         function on_events(eventList, callback, options) { return eventList.map(eventName => addEventListener(eventName, callback, options)).every(result => result); },
+        urls:           function on_urls(callback, urls) { return addTypicalPageListener(callback, urls); },
+        dashboard:      function on_dashboard(callback) { return addTypicalPageListener(callback, common.locations.dashboard); },
+        items_pages:    function on_items_pages(callback) { return addTypicalPageListener(callback, common.locations.items_pages); },
+        lessons:        function on_lessons(callback) { return addTypicalPageListener(callback, common.locations.lessons); },
+        lessons_picker: function on_lessons_picker(callback) { return addTypicalPageListener(callback, common.locations.lessons_picker); },
+        lessons_quiz:   function on_lessons_quiz(callback) { return addTypicalPageListener(callback, common.locations.lessons_quiz); },
+        reviews:        function on_reviews(callback) { return addTypicalPageListener(callback, common.locations.reviews); },
+    }
+    const eventMap = {
+        common: commonListeners,
+        turbo: turboListeners,
+    };
 
     const publishedInterface= {
         add_event_listener: addEventListener,
         remove_event_listener: removeEventListener,
-
         on: eventMap,
         events: turboEvents,
+        common: common,
     };
 
-    let lastUrlLoaded = document.URL;
+    let lastUrlLoaded = '!';
+    let nextUrl = '!';
 
-    //------------------------------
-    // Add handlers for all events.
-    //------------------------------
-    const internal_handlers = {};
-    const event_handlers = {};
-    function addEventListener(eventNames, listener) {
-        if (!Array.isArray(listener.urls)) listener.urls = [listener.urls];
-        if (!Array.isArray(eventNames)) eventNames = [eventNames];
-        listener.urls = listener.urls.map((url) => {
-            if (url instanceof RegExp) return url;
-            if (typeof url !== 'string') return null;
-            return new RegExp(url.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replaceAll('*','.*'));
-        }).filter(url => url !== null);
-        eventNames = eventNames.map((event) => {
-            if (typeof event === 'string') return event;
-            if (typeof event === 'object' && event.name) return event.name;
-            return null;
-        }).filter(event => event !== null);
+    /**
+     * Listeners
+     */
 
-        const result = {};
-        const lastUrl = lastUrlLoaded;
-        for (let i = 0; i < eventNames.length; i++){
-            const eventName = eventNames[i];
-            if (!internal_handlers[eventName])
-                document.documentElement.addEventListener(eventName, internal_handlers[eventName] = handleEvent);
-            if (!event_handlers[eventName])
-                event_handlers[eventName] = new Set();
-            event_handlers[eventName].add(listener);
-            result[eventName] = listener;
-            if (eventName === 'load' && typeof listener.callback === 'function' && listener.urls?.length > 0 && listener.urls.find(url => url.test(lastUrl)))
-                listener.callback();
-        }
-        result.remove = function() { eventNames.forEach(eventName => wkof.turbo.remove_event_listener(eventName, this[eventName])); }
-        return result;
+    // Add a typical listener to run for the provided urls.
+    function addTypicalPageListener(callback, urls) {
+        return wkof.turbo.on.common.events(['load', turboEvents.load.name], callback, {urls});
     }
 
-    function removeEventListener(eventName, listener) {
-        if (typeof eventName === 'object' && eventName.name) eventName = eventName.name;
-        else if (typeof eventName !== 'string') return false;
+    const internal_handlers = {};
+    const event_handlers = {};
+
+    // Sets up a function that will be called whenever the specified event is delivered to the target.
+    function addEventListener(eventName, listener, options) {
+        if (listener === undefined || listener === null) return false;
+        if (typeof eventName === 'object' && 'name' in eventName) eventName = eventName.name;
+        if (typeof eventName !== 'string') return false;
+
+        if (eventName === 'load' && typeof listener === 'function') {
+            const urls = normalizeUrls(options?.urls);
+            if (lastUrlLoaded === '!' || urls?.length > 0 && !urls.find(url => url.test(lastUrlLoaded)))
+                return true; // TODO: Should this return false?
+            listener();
+            return true;
+        }
+        if (!(eventName in internal_handlers)) addInternalEventListener(eventName, handleEvent,false);
+        if (!(eventName in event_handlers)) event_handlers[eventName] = new Map();
+        event_handlers[eventName].set(listener, options);
+        return true;
+    }
+
+    // Removes an event listener previously registered with addEventListener().
+    function removeEventListener(eventName, listener, options) {
+        if (listener === undefined || listener === null) return false;
+        if (typeof eventName === 'object' && 'name' in eventName) eventName = eventName.name;
+        if (typeof eventName !== 'string') return false;
         const eventHandlers = event_handlers[eventName];
-        if (eventHandlers) {
+        if (eventHandlers && eventHandlers.get(listener) === options) {
             eventHandlers.delete(listener);
-            if (eventHandlers.size === 0) document.documentElement.removeEventListener(eventName, internal_handlers[eventName]);
+            if (eventHandlers.size === 0) removeInternalEventListener(eventName);
             return true;
         }
         return false;
+    }
+
+    function addInternalEventListener(eventName, listener, persistent) {
+        if (typeof eventName !== 'string') return false;
+        if (eventName in internal_handlers) return false;
+        document.documentElement.addEventListener(eventName, listener);
+        internal_handlers[eventName] = {listener, persistent};
+        return true;
+    }
+
+    function removeInternalEventListener(eventName) {
+        if (typeof eventName !== 'string') return false;
+        if (!(eventName in internal_handlers)) return false;
+        const handler = internal_handlers[eventName];
+        if (handler.persistent) return false;
+        document.documentElement.removeEventListener(eventName, handler.listener);
+        delete internal_handlers[eventName];
+        return true;
     }
 
     //------------------------------
     // Call event handlers.
     //------------------------------
     function handleEvent(event) {
-        const handlers = event_handlers[event.type];
-        if (!handlers) return;
-        const lastUrl = lastUrlLoaded;
-        for (const handler of handlers) {
-            if (handler.urls?.length > 0 && !handler.urls.find(url => url.test(lastUrl))) continue;
-            if (typeof handler.callback === 'function') handler.callback(event);
+        if (event === undefined || event === null) return;
+        const eventName = event.type;
+        if (!(eventName in event_handlers)) return;
+        const eventUrl = nextUrl;
+        for (const [listener, options] of event_handlers[eventName]) {
+            if (typeof listener !== 'function') continue;
+            if (options?.nocache && event.target.hasAttribute('data-turbo-preview')) {
+                // Ignore cached pages. See https://discuss.hotwired.dev/t/before-cache-render-event/4928/4
+                continue;
+            }
+            const urls = normalizeUrls(options?.urls);
+            if (urls?.length > 0 && !urls.find(url => url.test(eventUrl))) continue;
+            listener(event);
+            if (options.once) removeEventListener(eventName, listener, options);
         }
     }
+
+    /**
+     * Helpers
+     */
+
+    function normalizeUrls(urls) {
+        if (urls === undefined || urls === null) return null;
+        if (!Array.isArray(urls)) urls = [urls];
+        return urls.reduce((acc,url) => {
+            if (url instanceof RegExp) acc.push(url);
+            if (typeof url === 'string') acc.push(new RegExp(url.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replaceAll('*','.*')));
+            return acc;
+        }, []);
+    }
+
+    /**
+     * Initialization
+     */
 
     function addTurboEvents() {
         wkof.turbo = publishedInterface;
 
-        [wkof.turbo.events.click,
-            wkof.turbo.events.before_visit,
-            wkof.turbo.events.visit,
-            wkof.turbo.events.before_cache,
-            wkof.turbo.events.render,
-            wkof.turbo.events.load
-        ].forEach(turboEvent => {
-            document.documentElement.addEventListener(turboEvent.name, internal_handlers[turboEvent.name] = event => {
-                lastUrlLoaded = event.detail?.url ?? event.target?.baseURI ?? document.URL;
-                handleEvent(event);
-            });
-        });
+        const updateNextUrlFromDetail = async event => {
+            nextUrl = event.detail.url;
+            await nextEventLoopTick();
+            handleEvent(event);
+        };
+        const updateCurrentUrlFromDetail = async event => {
+            lastUrlLoaded = nextUrl = event.detail.url;
+            await nextEventLoopTick();
+            handleEvent(event);
+        };
+        const updateNextUrlFromTarget = async event => {
+            nextUrl = event.target.baseURI;
+            await nextEventLoopTick();
+            handleEvent(event);
+        };
 
-        document.documentElement.addEventListener(wkof.turbo.events.before_render.name, internal_handlers[turboEvents.before_render.name] = event => {
-            lastUrlLoaded = event.target?.baseURI ?? document.URL;
-            let observer = new MutationObserver(m => {
-                if (relevantRootElementChildren(m[0].target).length > 0) return;
-                observer.disconnect();
-                observer = null;
-                handleEvent(event);
-            });
-            observer.observe(event.detail.newBody, {childList: true});
-        });
+        for (const turboEvent of [wkof.turbo.events.click, wkof.turbo.events.before_visit, wkof.turbo.events.visit])
+            addInternalEventListener(turboEvent.name, updateNextUrlFromDetail, true);
+        for (const turboEvent of [wkof.turbo.events.before_cache, wkof.turbo.events.before_render, wkof.turbo.events.render])
+            addInternalEventListener(turboEvent.name, updateNextUrlFromTarget, true);
 
+        addInternalEventListener(wkof.turbo.events.load.name, updateCurrentUrlFromDetail, true);
     }
 
-    // it seems like Turbo does not move the SVG element into document.body, so let's ignore it
-    function relevantRootElementChildren(rootElement) {
-        return [...rootElement?.children ?? []].filter(c => c.tagName !== `svg`);
-    }
+    const nextEventLoopTick = () => new Promise((resolve) => { setTimeout(() => resolve(), 0); });
 
     function startup() {
         if (!window.wkof) {
