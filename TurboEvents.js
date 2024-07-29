@@ -2,7 +2,7 @@
 // @name        Wanikani Open Framework Turbo Events
 // @namespace   https://greasyfork.org/en/users/11878
 // @description Adds helpful methods for dealing with Turbo Events to WaniKani Open Framework
-// @version     2.0.0
+// @version     2.0.1
 // @match       https://www.wanikani.com/*
 // @match       https://preview.wanikani.com/*
 // @author      Inserio
@@ -75,7 +75,7 @@
             lessons_quiz: /^https:\/\/www\.wanikani\.com\/subject-lessons\/[\d-]+\/quiz.*\/?$/,
             reviews: /^https:\/\/www\.wanikani\.com\/subjects\/review.*\/?$/,
         },
-    }
+    };
     const commonListeners = {
         events:         function on_events(eventList, callback, options) { return eventList.map(eventName => addEventListener(eventName, callback, options)).every(result => result); },
         urls:           function on_urls(callback, urls) { return addTypicalPageListener(callback, urls); },
@@ -85,7 +85,7 @@
         lessons_picker: function on_lessons_picker(callback) { return addTypicalPageListener(callback, common.locations.lessons_picker); },
         lessons_quiz:   function on_lessons_quiz(callback) { return addTypicalPageListener(callback, common.locations.lessons_quiz); },
         reviews:        function on_reviews(callback) { return addTypicalPageListener(callback, common.locations.reviews); },
-    }
+    };
     const eventMap = {
         common: commonListeners,
         turbo: turboListeners,
