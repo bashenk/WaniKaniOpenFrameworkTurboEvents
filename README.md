@@ -149,21 +149,19 @@ The `wkof.turbo` object has the following properties and methods:
 
 
 
-#### Whenever the script needs to run on a specific URL
+- **Always** set the `@match` userscript directive to `https://www.wanikani.com/*` or equivalent.
+    - Otherwise, the script may not end up running if the user refreshes the page somewhere unexpected.
 
-
-1. Use one of the convenience functions in `wkof.turbo.on` if one meets your requirements.
-
-
--- Or --
-
-1. Pass one or more URLs to the method in `wkof.turbo.on` that will be used. 
-   - URL inputs can be a `string`, a `RegExp`, or an array consisting of a mixture of those.
-2. Set the `@match` userscript directive to `https://www.wanikani.com/*` or equivalent.
-   - Otherwise, the script may not end up running if the user refreshes the page somewhere unexpected.
+Typical usage involves one of the following:
+1. Use one of the convenience functions in `wkof.turbo.on.common` if one meets your requirements.
+2. Pass one or more URLs to the method in `wkof.turbo.on.turbo` that will be used. 
+   - URLs can be passed using a `urls` property in the object passed to the `options` parameter
+     - For example, `{urls: myUrl}` or `{urls: [myUrl1, myUrl2]}`
+   - Inputs for the urls property can be a `string`, a `RegExp`, or an array consisting of a mixture of those.
 
 
 #### Special cases
+
 
 - "load" is a special use case event name.
   - Adding a listener for that event via this library causes it to execute the callback immediately after it is added  
