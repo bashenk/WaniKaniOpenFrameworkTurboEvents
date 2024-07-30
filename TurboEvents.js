@@ -2,7 +2,7 @@
 // @name        Wanikani Open Framework Turbo Events
 // @namespace   https://greasyfork.org/en/users/11878
 // @description Adds helpful methods for dealing with Turbo Events to WaniKani Open Framework
-// @version     2.0.1
+// @version     2.0.2
 // @match       https://www.wanikani.com/*
 // @match       https://preview.wanikani.com/*
 // @author      Inserio
@@ -108,7 +108,7 @@
 
     // Add a typical listener to run for the provided urls.
     function addTypicalPageListener(callback, urls) {
-        return wkof.turbo.on.common.events(['load', turboEvents.load.name], callback, {urls});
+        return wkof.turbo.on.common.events(['load', turboEvents.load.name], callback, {urls, noTimeout: false});
     }
 
     const internal_handlers = {};
@@ -168,22 +168,25 @@
     //------------------------------
     // Call event handlers.
     //------------------------------
-    function handleEvent(event) {
-        if (event === undefined || event === null) return;
-        const eventName = event.type;
-        if (!(eventName in event_handlers)) return;
-        const eventUrl = nextUrl;
-        for (const [listener, options] of event_handlers[eventName]) {
-            if (typeof listener !== 'function') continue;
-            if (options?.nocache && event.target.hasAttribute('data-turbo-preview')) {
-                // Ignore cached pages. See https://discuss.hotwired.dev/t/before-cache-render-event/4928/4
-                continue;
-            }
-            const urls = normalizeUrls(options?.urls);
-            if (urls?.length > 0 && !urls.find(url => url.test(eventUrl))) continue;
-            listener(event);
-            if (options.once) removeEventListener(eventName, listener, options);
-        }
+    async function handleEvent(event) {
+        await Promise.all(getEventHandlers(event));
+    }
+
+    function * getEventHandlers(event) {
+        if (event === undefined || event === null || !(event.type in event_handlers)) return;
+        for (const [listener, options] of event_handlers[event.type])
+            yield emitHandler(event, listener, options);
+    }
+
+    async function emitHandler(event, listener, options) {
+        // Ignore cached pages. See https://discuss.hotwired.dev/t/before-cache-render-event/4928/4
+        if (options?.nocache && event.target.hasAttribute('data-turbo-preview')) return;
+        const urls = normalizeUrls(options?.urls);
+        if (urls?.length > 0 && !urls.find(url => url.test(nextUrl))) return;
+        // yield a promise for each listener
+        if (!options?.noTimeout) await nextEventLoopTick();
+        listener(event);
+        if (options?.once) removeEventListener(event.type, listener, options);
     }
 
     /**
@@ -209,18 +212,15 @@
 
         const updateNextUrlFromDetail = async event => {
             nextUrl = event.detail.url;
-            await nextEventLoopTick();
-            handleEvent(event);
+            await handleEvent(event);
         };
         const updateCurrentUrlFromDetail = async event => {
             lastUrlLoaded = nextUrl = event.detail.url;
-            await nextEventLoopTick();
-            handleEvent(event);
+            await handleEvent(event);
         };
         const updateNextUrlFromTarget = async event => {
             nextUrl = event.target.baseURI;
-            await nextEventLoopTick();
-            handleEvent(event);
+            await handleEvent(event);
         };
 
         for (const turboEvent of [wkof.turbo.events.click, wkof.turbo.events.before_visit, wkof.turbo.events.visit])
@@ -231,7 +231,7 @@
         addInternalEventListener(wkof.turbo.events.load.name, updateCurrentUrlFromDetail, true);
     }
 
-    const nextEventLoopTick = () => new Promise((resolve) => { setTimeout(() => resolve(), 0); });
+    const nextEventLoopTick = () => new Promise(resolve => { setTimeout(() => resolve(), 0); });
 
     function startup() {
         if (!window.wkof) {

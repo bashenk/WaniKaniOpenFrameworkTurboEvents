@@ -173,7 +173,7 @@ Typical usage involves one of the following:
 
 
 
-#### Very basic, minimal script configuration
+#### Basic/minimal script configuration
 
 
 ```javascript
@@ -260,19 +260,23 @@ function configurePageHandler() {
     // Run the callback on "turbo:click" on any page.
     wkof.turbo.on.event.click(callbackFunction);
 
-    let eventName = wkof.turbo.events.click.name;
-
-    // Run the callback on "turbo:before-render" only on the dashboard and reviews pages.
-    const options1 = {urls: [dashboardRegex, reviewsRegex]};
+    const options1 = {
+        // Run the callback only on the dashboard and reviews pages.
+        urls: [dashboardRegex, reviewsRegex]
+    };
+    // Run the callback on the "turbo:before-render" event
     const onBeforeRender = wkof.turbo.on.event.before_render(callbackFunction, options1);
 
-    // Run the callback on initial page load and turbo:before-render on the dashboard only.
+    // Run the callback on initial page load and turbo:before-render
+    // See the special case note about "load" in the preceding section.
+    let eventList = ['load', wkof.turbo.events.before_render];
+    const options2 = {
+        urls: dashboardRegex, // Run the callback only on the dashboard.
+        once: true // Automatically remove the event after firing once
+    };
     // The first parameter can be an array including either the turbo event object that's provided
     // (wkof.turbo.events.before_render) or the string itself ("turbo:before-render").
     // Note that two new listeners are added in this example, one for each event.
-    // See the special case note about "load" in the preceding section.
-    let eventList = ['load', wkof.turbo.events.before_render];
-    const options2 = {urls: dashboardRegex};
     const onLoadAndBeforeRender = wkof.turbo.on.common.events(eventList, callbackFunction, options2);
 
     // If desired, remove listeners by using the method in the wkof.turbo object.
@@ -280,11 +284,17 @@ function configurePageHandler() {
         wkof.turbo.remove_event_listener(eventName, callbackFunction, options2);
     });
 
-    eventName = wkof.turbo.events.before_render.name;
     wkof.turbo.remove_event_listener(wkof.turbo.events.before_render, callbackFunction);
 
-    // Can also use the more generic method to add/remove listeners with more fine-tuned control.
-    const options3 = {once: true, nocache: true};
+    // Can also use the generic `add_event_listener` method to add/remove listeners with more
+    // fine-tuned control.
+
+    const options3 = {
+        once: true, // Automatically remove the event after firing once
+        nocache: true, // Ignore events for cached pages
+        noTimeout: true // Don't use the built-in feature that executes setTimeout delay execution 
+                        // of the callback until the event has finished firing  
+    };
     const visitHandler = wkof.turbo.add_event_listener(wkof.turbo.events.visit, callbackFunction, options3)
     wkof.turbo.remove_event_listener(wkof.turbo.events.visit, callbackFunction, options3);
 
