@@ -44,7 +44,7 @@ The `wkof.turbo` object has the following properties and methods:
 >      - `lessons_picker(callback)`
 >      - `lessons_quiz(callback)`
 >      - `reviews(callback)`
->   - `turbo`: contains functions to set listeners for each of the turbo events.
+>   - `event`: contains functions to set listeners for each of the turbo events.
 >      - `click(callback, urls, options)`
 >      - `before_visit(callback, urls, options)`
 >      - `visit(callback, urls, options)`
@@ -154,7 +154,7 @@ The `wkof.turbo` object has the following properties and methods:
 
 Typical usage involves one of the following:
 1. Use one of the convenience functions in `wkof.turbo.on.common` if one meets your requirements.
-2. Pass one or more URLs to the method in `wkof.turbo.on.turbo` that will be used. 
+2. Pass one or more URLs to the method in `wkof.turbo.on.event` that will be used. 
    - URLs can be passed using a `urls` property in the object passed to the `options` parameter
      - For example, `{urls: myUrl}` or `{urls: [myUrl1, myUrl2]}`
    - Inputs for the urls property can be a `string`, a `RegExp`, or an array consisting of a mixture of those.
@@ -258,13 +258,13 @@ const dashboardRegex = /^https:\/\/www\.wanikani\.com(\/dashboard.*)?\/?$/;
 
 function configurePageHandler() {
     // Run the callback on "turbo:click" on any page.
-    wkof.turbo.on.turbo.click(callbackFunction);
+    wkof.turbo.on.event.click(callbackFunction);
 
     let eventName = wkof.turbo.events.click.name;
 
     // Run the callback on "turbo:before-render" only on the dashboard and reviews pages.
     const options1 = {urls: [dashboardRegex, reviewsRegex]};
-    const onBeforeRender = wkof.turbo.on.turbo.before_render(callbackFunction, options1);
+    const onBeforeRender = wkof.turbo.on.event.before_render(callbackFunction, options1);
 
     // Run the callback on initial page load and turbo:before-render on the dashboard only.
     // The first parameter can be an array including either the turbo event object that's provided
@@ -288,6 +288,6 @@ function configurePageHandler() {
     const visitHandler = wkof.turbo.add_event_listener(wkof.turbo.events.visit, callbackFunction, options3)
     wkof.turbo.remove_event_listener(wkof.turbo.events.visit, callbackFunction, options3);
 
-    // Listener is still active from the `wkof.turbo.on.turbo.click(callbackFunction)` invocation.
+    // Listener is still active from the `wkof.turbo.on.event.click(callbackFunction)` invocation.
 }
 ```

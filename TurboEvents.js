@@ -88,7 +88,7 @@
     };
     const eventMap = {
         common: commonListeners,
-        turbo: turboListeners,
+        event: turboListeners,
     };
 
     const publishedInterface= {
