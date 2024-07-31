@@ -213,10 +213,8 @@
                 return object2 === null;
         }
         function otherObjectContainsAllPropertiesInObject(object, otherObject) {
-            for (const prop in object) {
-                if (!(prop in otherObject)) return false;
-                if (object[prop] !== otherObject[prop]) return false;
-            }
+            for (const prop in object)
+                if (!(prop in otherObject) || object[prop] !== otherObject[prop])  return false;
             return true;
         }
         return otherObjectContainsAllPropertiesInObject(object1, object2) && otherObjectContainsAllPropertiesInObject(object2, object1);
