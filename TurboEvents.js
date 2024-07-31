@@ -137,9 +137,9 @@
     function removeEventListener(eventName, listener, options) {
         if (listener === undefined || listener === null) return false;
         if (typeof eventName === 'object' && 'name' in eventName) eventName = eventName.name;
-        if (typeof eventName !== 'string') return false;
+        if (typeof eventName !== 'string' || !(eventName in event_handlers)) return false;
         const eventHandlers = event_handlers[eventName];
-        if (!eventHandlers || !eventHandlers.has(listener)) return false;
+        if (!eventHandlers.has(listener)) return false;
         const listenerOptions = eventHandlers.get(listener);
         if (areObjectPropertiesEqual(listenerOptions, options)) {
             eventHandlers.delete(listener);
