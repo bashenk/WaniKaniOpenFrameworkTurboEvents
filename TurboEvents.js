@@ -2,7 +2,7 @@
 // @name        Wanikani Open Framework Turbo Events
 // @namespace   https://greasyfork.org/en/users/11878
 // @description Adds helpful methods for dealing with Turbo Events to WaniKani Open Framework
-// @version     2.0.2
+// @version     2.0.3
 // @match       https://www.wanikani.com/*
 // @match       https://preview.wanikani.com/*
 // @author      Inserio
@@ -139,7 +139,9 @@
         if (typeof eventName === 'object' && 'name' in eventName) eventName = eventName.name;
         if (typeof eventName !== 'string') return false;
         const eventHandlers = event_handlers[eventName];
-        if (eventHandlers && eventHandlers.get(listener) === options) {
+        if (!eventHandlers || !eventHandlers.has(listener)) return false;
+        const listenerOptions = eventHandlers.get(listener);
+        if (areObjectPropertiesEqual(listenerOptions, options)) {
             eventHandlers.delete(listener);
             if (eventHandlers.size === 0) removeInternalEventListener(eventName);
             return true;
@@ -201,6 +203,23 @@
             if (typeof url === 'string') acc.push(new RegExp(url.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replaceAll('*','.*')));
             return acc;
         }, []);
+    }
+
+    function areObjectPropertiesEqual(object1, object2) {
+        switch (object1) {
+            case undefined:
+                return object2 === undefined;
+            case null:
+                return object2 === null;
+        }
+        function otherObjectContainsAllPropertiesInObject(object, otherObject) {
+            for (const prop in object) {
+                if (!(prop in otherObject)) return false;
+                if (object[prop] !== otherObject[prop]) return false;
+            }
+            return true;
+        }
+        return otherObjectContainsAllPropertiesInObject(object1, object2) && otherObjectContainsAllPropertiesInObject(object2, object1);
     }
 
     /**
