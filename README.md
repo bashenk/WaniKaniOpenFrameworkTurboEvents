@@ -163,7 +163,7 @@ Typical usage involves one of the following:
 #### Special cases
 
 
-- "load" is a special use case event name.
+- "load" (not to be confused with "turbo:load") is a special use case event name.
   - Adding a listener for that event via this library causes it to execute the callback immediately after it is added  
     in the case that the URL matches and the "turbo:load" event has already fired.
 
