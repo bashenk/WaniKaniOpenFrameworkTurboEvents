@@ -44,7 +44,7 @@ The `wkof.turbo` object has the following properties and methods:
 >      - `lessons_picker(callback)`
 >      - `lessons_quiz(callback)`
 >      - `reviews(callback)`
->   - `event`: contains functions to set listeners for each of the turbo events.
+>   - `event`: contains functions to set listeners for each of the Turbo events.
 >      - `click(callback, urls, options)`
 >      - `before_visit(callback, urls, options)`
 >      - `visit(callback, urls, options)`
@@ -223,9 +223,14 @@ if (!window.wkof) {
 wkof.ready('TurboEvents').then(configureTurbo);
 
 function configureTurbo() {
-    // This script needs to run whenever the user is in a reviews session
-    const reviewsRegex = /^https:\/\/www\.wanikani\.com\/subjects\/review.*\/?$/;
-    const options = {urls: reviewsRegex};
+    // This example needs to run whenever the user is in a reviews session or lessons quiz. So this
+    // example will use ones conviently provided by this library
+    const options = {
+        urls: [
+            wkof.turbo.common.locations.reviews,
+            wkof.turbo.common.locations.lessons_quiz
+        ]
+    };
 
     // These are the events most often of use for general purpose scripts
     // See the special case note about 'load' in the preceding section.
@@ -247,61 +252,61 @@ function main() {
 // Make sure the events are fully loaded before starting your configuration.
 wkof.ready('TurboEvents').then(configurePageHandler);
 
-// The callback function can accept an event argument, which is provided in the callback for all
-// turbo events. That is, it is *not* provided for the special case of the aforementioned "load" event.
-function callbackFunction(event) {
-    console.log(`callbackFunction() has run for event "${event?.type ?? 'load'}"`);
+// The callback function can accept an event argument, which is provided in the callback for all Turbo
+// events. That is, it is *not* provided for the special case of the aforementioned "load" event.
+function myFunction(event) {
+    console.log(`myFunction() has run for event "${event?.type ?? 'load'}"`);
 }
-
-const reviewsRegex = /^https:\/\/www\.wanikani\.com\/subjects\/review.*\/?$/;
-const dashboardRegex = /^https:\/\/www\.wanikani\.com(\/dashboard.*)?\/?$/;
 
 function configurePageHandler() {
     // Run the callback on "turbo:click" on any page.
-    wkof.turbo.on.event.click(callbackFunction);
+    wkof.turbo.on.event.click(myFunction);
 
     const options1 = {
-        // Run the callback only on the dashboard and reviews pages.
-        urls: [dashboardRegex, reviewsRegex]
+        // Run the callback on the dashboard and on individual radical, kanji, or vocab pages.
+        urls: [wkof.turbo.common.locations.dashboard, wkof.turbo.common.locations.items_pages]
     };
     // Run the callback on the "turbo:before-render" event
-    const onBeforeRender = wkof.turbo.on.event.before_render(callbackFunction, options1);
+    const onBeforeRender = wkof.turbo.on.event.before_render(myFunction, options1);
 
-    // Run the callback on initial page load and turbo:before-render
+    // Run the callback on initial page load, turbo:before-render, and turbo:before-frame-render
     // See the special case note about "load" in the preceding section.
-    let eventList = ['load', wkof.turbo.events.before_render];
+    let eventList = ['load', wkof.turbo.events.before_render, wkof.turbo.events.before_frame_render];
     const options2 = {
-        urls: dashboardRegex, // Run the callback only on the dashboard.
-        once: true // Automatically remove the event after firing once
+        // Run the callback on the lessons picker page.
+        urls: wkof.turbo.common.locations.lessons_picker,
+        // Automatically remove the event after firing once
+        once: true
     };
-    // The first parameter can be an array including either the turbo event object that's provided
+    // The first parameter can be an array including either the Turbo event object that's provided
     // (wkof.turbo.events.before_render) or the string itself ("turbo:before-render").
-    // Note that two new listeners are added in this example, one for each event.
-    const onLoadAndBeforeRender = wkof.turbo.on.common.events(eventList, callbackFunction, options2);
+    // Note that two new listeners are added in this example, one for each **Turbo** event.
+    const onLoadAndBeforeRender = wkof.turbo.on.common.events(eventList, myFunction, options2);
 
-    // If desired, remove listeners by using the method in the wkof.turbo object.
-    // In this scenario, this would almost certainly return [false, true], since the "load" event doesn't
-    // create a listener. However, if the "turbo:before-render" event has fired between creating the listener
-    // and making the following call, the second loop would also return false because it would've already been
-    // removed due to using the `once: true` option during creation.
+    // Remove listeners by using `wkof.turbo.remove_event_listener(eventName, listener, options)`.
+    // In this scenario, the result would presumably be [false, true, true], since the "load" event
+    // doesn't create a listener. However, if a "turbo:before-render" or "turbo:before-frame-render"
+    // event has fired between creating the listener and making the following call, the respective
+    // loop condition or conditions would also return false because the listener or listeners would
+    // have already been removed due to using the `once: true` option during creation.
     eventList.forEach(eventName => {
-        wkof.turbo.remove_event_listener(eventName, callbackFunction, options2);
+        wkof.turbo.remove_event_listener(eventName, myFunction, options2);
     });
 
-    wkof.turbo.remove_event_listener(wkof.turbo.events.before_render, callbackFunction);
-
-    // Can also use the generic `add_event_listener` method to add/remove listeners with more
-    // fine-tuned control.
-
     const options3 = {
-        once: true, // Automatically remove the event after firing once
-        nocache: true, // Ignore events for cached pages
-        noTimeout: true // Don't use the built-in feature that executes setTimeout delay execution 
-                        // of the callback until the event has finished firing  
+        // Automatically remove the event after firing once
+        once: true,
+        // Ignore events for Turbo's cached version of pages
+        nocache: true,
+        // Disable the built-in feature that slightly delays execution of the callback until the event
+        // has finished firing, which is executed essentially as `setTimeout(callback, 0)`.
+        noTimeout: true
     };
-    const visitHandler = wkof.turbo.add_event_listener(wkof.turbo.events.visit, callbackFunction, options3)
-    wkof.turbo.remove_event_listener(wkof.turbo.events.visit, callbackFunction, options3);
+    // `urls` option isn't set, so this will run on the `visit` event for every page.
+    // However, since `once: true` is set, it will be removed after first execution.
+    const visitHandler = wkof.turbo.add_event_listener(wkof.turbo.events.visit, myFunction, options3)
+    wkof.turbo.remove_event_listener(wkof.turbo.events.visit, myFunction, options3);
 
-    // Listener is still active from the `wkof.turbo.on.event.click(callbackFunction)` invocation.
+    // Listener is still active from the `wkof.turbo.on.event.click(myFunction)` invocation.
 }
 ```
