@@ -224,7 +224,7 @@ wkof.ready('TurboEvents').then(configureTurbo);
 
 function configureTurbo() {
     // This example needs to run whenever the user is in a reviews session or lessons quiz. So this
-    // example will use ones conviently provided by this library
+    // example will use RegEx objects conviently provided by this library.
     const options = {
         urls: [
             wkof.turbo.common.locations.reviews,
@@ -266,10 +266,10 @@ function configurePageHandler() {
         // Run the callback on the dashboard and on individual radical, kanji, or vocab pages.
         urls: [wkof.turbo.common.locations.dashboard, wkof.turbo.common.locations.items_pages]
     };
-    // Run the callback on the "turbo:before-render" event
-    const onBeforeRender = wkof.turbo.on.event.before_render(myFunction, options1);
+    // Run the callback on the "turbo:before-render" event.
+    wkof.turbo.on.event.before_render(myFunction, options1);
 
-    // Run the callback on initial page load, turbo:before-render, and turbo:before-frame-render
+    // Run the callback on initial page load, turbo:before-render, and turbo:before-frame-render.
     // See the special case note about "load" in the preceding section.
     let eventList = ['load', wkof.turbo.events.before_render, wkof.turbo.events.before_frame_render];
     const options2 = {
@@ -281,7 +281,7 @@ function configurePageHandler() {
     // The first parameter can be an array including either the Turbo event object that's provided
     // (wkof.turbo.events.before_render) or the string itself ("turbo:before-render").
     // Note that two new listeners are added in this example, one for each **Turbo** event.
-    const onLoadAndBeforeRender = wkof.turbo.on.common.events(eventList, myFunction, options2);
+    wkof.turbo.on.common.events(eventList, myFunction, options2);
 
     // Remove listeners by using `wkof.turbo.remove_event_listener(eventName, listener, options)`.
     // In this scenario, the result would presumably be [false, true, true], since the "load" event
@@ -290,21 +290,25 @@ function configurePageHandler() {
     // loop condition or conditions would also return false because the listener or listeners would
     // have already been removed due to using the `once: true` option during creation.
     eventList.forEach(eventName => {
-        wkof.turbo.remove_event_listener(eventName, myFunction, options2);
+        // The callback and options must both match the existing listener or the removal will fail. 
+        // Callback must be reference equal, but the options can just have equivalent values.
+        let equivalentOptions = {urls: wkof.turbo.common.locations.lessons_picker, once: true};
+        wkof.turbo.remove_event_listener(eventName, myFunction, equivalentOptions);
     });
 
     const options3 = {
-        // Automatically remove the event after firing once
+        // Automatically remove the event after firing once.
         once: true,
-        // Ignore events for Turbo's cached version of pages
+        // Ignore events for Turbo's cached version of pages.
         nocache: true,
-        // Disable the built-in feature that slightly delays execution of the callback until the event
-        // has finished firing, which is executed essentially as `setTimeout(callback, 0)`.
+        // Disable the built-in feature that slightly delays the callback execution until the event
+        // has finished firing, which is done essentially via `setTimeout(callback, 0)`.
         noTimeout: true
     };
     // `urls` option isn't set, so this will run on the `visit` event for every page.
     // However, since `once: true` is set, it will be removed after first execution.
-    const visitHandler = wkof.turbo.add_event_listener(wkof.turbo.events.visit, myFunction, options3)
+    wkof.turbo.add_event_listener(wkof.turbo.events.visit, myFunction, options3);
+    // Or, it can be removed immediately.
     wkof.turbo.remove_event_listener(wkof.turbo.events.visit, myFunction, options3);
 
     // Listener is still active from the `wkof.turbo.on.event.click(myFunction)` invocation.
