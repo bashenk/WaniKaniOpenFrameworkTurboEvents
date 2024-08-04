@@ -280,6 +280,10 @@ function configurePageHandler() {
     const onLoadAndBeforeRender = wkof.turbo.on.common.events(eventList, callbackFunction, options2);
 
     // If desired, remove listeners by using the method in the wkof.turbo object.
+    // In this scenario, this would almost certainly return [false, true], since the "load" event doesn't
+    // create a listener. However, if the "turbo:before-render" event has fired between creating the listener
+    // and making the following call, the second loop would also return false because it would've already been
+    // removed due to using the `once: true` option during creation.
     eventList.forEach(eventName => {
         wkof.turbo.remove_event_listener(eventName, callbackFunction, options2);
     });
