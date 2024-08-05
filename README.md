@@ -249,11 +249,11 @@ function main() {
 #### Various different methods of creating and removing listeners
 
 ```javascript
-// Make sure the events are fully loaded before starting your configuration.
+// Make sure the events are fully loaded before starting any configuration of this library.
 wkof.ready('TurboEvents').then(configurePageHandler);
 
-// The callback function can accept an event argument, which is provided in the callback for all Turbo
-// events. That is, it is *not* provided for the special case of the aforementioned "load" event.
+// The callback function is passed an event argument for all Turbo events. However, it is *not*
+// provided for the special case of the aforementioned "load" event.
 function myFunction(event) {
     console.log(`myFunction() has run for event "${event?.type ?? 'load'}"`);
 }
@@ -269,23 +269,23 @@ function configurePageHandler() {
     // Run the callback on the "turbo:before-render" event.
     wkof.turbo.on.event.before_render(myFunction, options1);
 
-    // Run the callback on initial page load, turbo:before-render, and turbo:before-frame-render.
+    // Run the callback on initial page load, turbo:before-render, and turbo:frame_render.
     // See the special case note about "load" in the preceding section.
-    let eventList = ['load', wkof.turbo.events.before_render, wkof.turbo.events.before_frame_render];
+    let eventList = ['load', wkof.turbo.events.before_render, wkof.turbo.events.frame_render];
     const options2 = {
         // Run the callback on the lessons picker page.
         urls: wkof.turbo.common.locations.lessons_picker,
         // Automatically remove the event after firing once
         once: true
     };
-    // The first parameter can be an array including either the Turbo event object that's provided
+    // The first parameter can be an array including either the Turbo event object that is provided
     // (wkof.turbo.events.before_render) or the string itself ("turbo:before-render").
     // Note that two new listeners are added in this example, one for each **Turbo** event.
     wkof.turbo.on.common.events(eventList, myFunction, options2);
 
     // Remove listeners by using `wkof.turbo.remove_event_listener(eventName, listener, options)`.
     // In this scenario, the result would presumably be [false, true, true], since the "load" event
-    // doesn't create a listener. However, if a "turbo:before-render" or "turbo:before-frame-render"
+    // does not create a listener. However, if a "turbo:before-render" or "turbo:frame-render"
     // event has fired between creating the listener and making the following call, the respective
     // loop condition or conditions would also return false because the listener or listeners would
     // have already been removed due to using the `once: true` option during creation.
@@ -305,7 +305,7 @@ function configurePageHandler() {
         // has finished firing, which is done essentially via `setTimeout(callback, 0)`.
         noTimeout: true
     };
-    // `urls` option isn't set, so this will run on the `visit` event for every page.
+    // The `urls` option is not set, so this will run on the `visit` event for every page.
     // However, since `once: true` is set, it will be removed after first execution.
     wkof.turbo.add_event_listener(wkof.turbo.events.visit, myFunction, options3);
     // Or, it can be removed immediately.
