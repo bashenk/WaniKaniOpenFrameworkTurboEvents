@@ -2,7 +2,7 @@
 // @name        Wanikani Open Framework Turbo Events
 // @namespace   https://greasyfork.org/en/users/11878
 // @description Adds helpful methods for dealing with Turbo Events to WaniKani Open Framework
-// @version     2.0.3
+// @version     2.0.4
 // @match       https://www.wanikani.com/*
 // @match       https://preview.wanikani.com/*
 // @author      Inserio
@@ -91,7 +91,7 @@
         event: turboListeners,
     };
 
-    const publishedInterface= {
+    const publishedInterface = {
         add_event_listener: addEventListener,
         remove_event_listener: removeEventListener,
         on: eventMap,
@@ -127,7 +127,7 @@
             listener();
             return true;
         }
-        if (!(eventName in internal_handlers)) addInternalEventListener(eventName, handleEvent,false);
+        if (!(eventName in internal_handlers)) addInternalEventListener(eventName, handleEvent, false);
         if (!(eventName in event_handlers)) event_handlers[eventName] = new Map();
         event_handlers[eventName].set(listener, options);
         return true;
@@ -141,7 +141,7 @@
         const eventHandlers = event_handlers[eventName];
         if (!eventHandlers.has(listener)) return false;
         const listenerOptions = eventHandlers.get(listener);
-        if (areObjectPropertiesEqual(listenerOptions, options)) {
+        if (deepEqual(listenerOptions, options)) {
             eventHandlers.delete(listener);
             if (eventHandlers.size === 0) removeInternalEventListener(eventName);
             return true;
@@ -198,26 +198,19 @@
     function normalizeUrls(urls) {
         if (urls === undefined || urls === null) return null;
         if (!Array.isArray(urls)) urls = [urls];
-        return urls.reduce((acc,url) => {
+        return urls.reduce((acc, url) => {
             if (url instanceof RegExp) acc.push(url);
-            if (typeof url === 'string') acc.push(new RegExp(url.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replaceAll('*','.*')));
+            if (typeof url === 'string') acc.push(new RegExp(url.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replaceAll('*', '.*')));
             return acc;
         }, []);
     }
 
-    function areObjectPropertiesEqual(object1, object2) {
-        switch (object1) {
-            case undefined:
-                return object2 === undefined;
-            case null:
-                return object2 === null;
-        }
-        function otherObjectContainsAllPropertiesInObject(object, otherObject) {
-            for (const prop in object)
-                if (!(prop in otherObject) || object[prop] !== otherObject[prop])  return false;
-            return true;
-        }
-        return otherObjectContainsAllPropertiesInObject(object1, object2) && otherObjectContainsAllPropertiesInObject(object2, object1);
+    function deepEqual(x, y) {
+        const ok = Object.keys, tx = typeof x, ty = typeof y;
+        return x && y && tx === 'object' && tx === ty ? (
+            ok(x).length === ok(y).length &&
+            ok(x).every(key => deepEqual(x[key], y[key]))
+        ) : (x === y);
     }
 
     /**
@@ -248,11 +241,13 @@
         addInternalEventListener(wkof.turbo.events.load.name, updateCurrentUrlFromDetail, true);
     }
 
-    const nextEventLoopTick = () => new Promise(resolve => { setTimeout(() => resolve(), 0); });
+    function nextEventLoopTick() {
+        return new Promise(resolve => setTimeout(() => resolve(), 0));
+    }
 
     function startup() {
         if (!window.wkof) {
-            const response = confirm('WaniKani Open Framework Additional Filters requires WaniKani Open Framework.\n Click "OK" to be forwarded to installation instructions.');
+            const response = confirm('WaniKani Open Framework Turbo Events requires WaniKani Open Framework.\n Click "OK" to be forwarded to installation instructions.');
             if (response) window.location.href = 'https://community.wanikani.com/t/instructions-installing-wanikani-open-framework/28549';
             return;
         }
