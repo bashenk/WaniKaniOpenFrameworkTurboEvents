@@ -2,7 +2,7 @@
 // @name        Wanikani Open Framework Turbo Events
 // @namespace   https://greasyfork.org/en/users/11878
 // @description Adds helpful methods for dealing with Turbo Events to WaniKani Open Framework
-// @version     2.0.4
+// @version     2.1.0
 // @match       https://www.wanikani.com/*
 // @match       https://preview.wanikani.com/*
 // @author      Inserio
@@ -101,6 +101,7 @@
 
     let lastUrlLoaded = '!';
     let nextUrl = '!';
+    let fetchUrl = '!';
 
     /**
      * Listeners
@@ -127,7 +128,7 @@
             listener();
             return true;
         }
-        if (!(eventName in internal_handlers)) addInternalEventListener(eventName, handleEvent, false);
+        addInternalEventListener(eventName, handleEvent, {activate: true, persistent: false});
         if (!(eventName in event_handlers)) event_handlers[eventName] = new Map();
         event_handlers[eventName].set(listener, options);
         return true;
@@ -149,11 +150,17 @@
         return false;
     }
 
-    function addInternalEventListener(eventName, listener, persistent) {
+    function addInternalEventListener(eventName, listener, options) {
         if (typeof eventName !== 'string') return false;
-        if (eventName in internal_handlers) return false;
-        document.documentElement.addEventListener(eventName, listener);
-        internal_handlers[eventName] = {listener, persistent};
+        const {activate, persistent} = options;
+        let internalHandler = internal_handlers[eventName];
+        if (!internalHandler)
+            internalHandler = internal_handlers[eventName] = {listener, persistent, active: false};
+
+        if (!internalHandler.active && activate) {
+            document.documentElement.addEventListener(eventName, listener);
+            internalHandler.active = activate;
+        }
         return true;
     }
 
@@ -161,9 +168,10 @@
         if (typeof eventName !== 'string') return false;
         if (!(eventName in internal_handlers)) return false;
         const handler = internal_handlers[eventName];
-        if (handler.persistent) return false;
+        if (handler.persistent || !handler.active) return false;
         document.documentElement.removeEventListener(eventName, handler.listener);
-        delete internal_handlers[eventName];
+        handler.active = false;
+        if (!handler.persistent) delete internal_handlers[eventName];
         return true;
     }
 
@@ -184,7 +192,7 @@
         // Ignore cached pages. See https://discuss.hotwired.dev/t/before-cache-render-event/4928/4
         if (options?.nocache && event.target.hasAttribute('data-turbo-preview')) return;
         const urls = normalizeUrls(options?.urls);
-        if (urls?.length > 0 && !urls.find(url => url.test(nextUrl))) return;
+        if (urls?.length > 0 && !urls.find(url => event.type.includes('fetch') ? url.test(fetchUrl) : url.test(nextUrl))) return;
         // yield a promise for each listener
         if (!options?.noTimeout) await nextEventLoopTick();
         listener(event);
@@ -220,25 +228,76 @@
     function addTurboEvents() {
         wkof.turbo = publishedInterface;
 
-        const updateNextUrlFromDetail = async event => {
-            nextUrl = event.detail.url;
-            await handleEvent(event);
-        };
         const updateCurrentUrlFromDetail = async event => {
             lastUrlLoaded = nextUrl = event.detail.url;
             await handleEvent(event);
         };
-        const updateNextUrlFromTarget = async event => {
+        const updateFetchUrlFromDetailFetchResponse = async event => {
+            fetchUrl = event.detail.fetchResponse.response.url;
+            await handleEvent(event);
+        };
+        const updateFetchUrlFromDetailRequestUrl = async event => {
+            fetchUrl = event.detail.request.url.href; // unable to test, but this should be correct
+            await handleEvent(event);
+        };
+        const updateFetchUrlFromDetailUrl = async event => {
+            fetchUrl = event.detail.url.href;
+            await handleEvent(event);
+        };
+        const updateNextUrlFromDetail = async event => {
+            nextUrl = event.detail.url;
+            await handleEvent(event);
+        };
+        const updateNextUrlFromDetailResponse = async event => {
+            nextUrl = event.detail.response.url;
+            await handleEvent(event);
+        };
+        const updateNextUrlFromDetailNewFrame = async event => {
+            nextUrl = event.detail.newFrame.baseURI;
+            await handleEvent(event);
+        };
+        const updateNextUrlFromDetailNewStream = async event => {
+            nextUrl = event.detail.newStream.url;
+            await handleEvent(event);
+        };
+        const updateNextUrlFromTargetBaseURI = async event => {
             nextUrl = event.target.baseURI;
             await handleEvent(event);
         };
+        const updateFetchUrlFromTargetHref = async event => {
+            nextUrl = event.target.href;
+            await handleEvent(event);
+        };
 
-        for (const turboEvent of [wkof.turbo.events.click, wkof.turbo.events.before_visit, wkof.turbo.events.visit])
-            addInternalEventListener(turboEvent.name, updateNextUrlFromDetail, true);
-        for (const turboEvent of [wkof.turbo.events.before_cache, wkof.turbo.events.before_render, wkof.turbo.events.render])
-            addInternalEventListener(turboEvent.name, updateNextUrlFromTarget, true);
+        // This one is necessary to run at the start and to keep active
+        // persistently to ensure `lastUrlLoaded` is properly maintained.
+        addInternalEventListener(wkof.turbo.events.load.name, updateCurrentUrlFromDetail, {activate: true, persistent: true});
 
-        addInternalEventListener(wkof.turbo.events.load.name, updateCurrentUrlFromDetail, true);
+        for (const [turboEvent, func] of [
+            [wkof.turbo.events.click, updateNextUrlFromDetail],
+            [wkof.turbo.events.before_visit, updateNextUrlFromDetail],
+            [wkof.turbo.events.visit, updateNextUrlFromDetail],
+
+            [wkof.turbo.events.frame_missing, updateNextUrlFromDetailResponse],
+
+            [wkof.turbo.events.before_stream_render, updateNextUrlFromDetailNewStream],
+
+            [wkof.turbo.events.before_cache, updateNextUrlFromTargetBaseURI],
+            [wkof.turbo.events.before_render, updateNextUrlFromTargetBaseURI],
+            [wkof.turbo.events.frame_render, updateNextUrlFromTargetBaseURI],
+            [wkof.turbo.events.frame_load, updateNextUrlFromTargetBaseURI],
+            [wkof.turbo.events.render, updateNextUrlFromTargetBaseURI],
+
+            [wkof.turbo.events.before_fetch_request, updateFetchUrlFromDetailUrl],
+
+            [wkof.turbo.events.before_fetch_response, updateFetchUrlFromDetailFetchResponse],
+
+            [wkof.turbo.events.fetch_request_error, updateFetchUrlFromDetailRequestUrl],
+
+            [wkof.turbo.events.before_prefetch, updateFetchUrlFromTargetHref],
+
+            [wkof.turbo.events.before_frame_render, updateNextUrlFromDetailNewFrame],
+        ]) addInternalEventListener(turboEvent.name, func, {activate: false, persistent: false});
     }
 
     function nextEventLoopTick() {
