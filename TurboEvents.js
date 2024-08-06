@@ -297,9 +297,10 @@
         // Ignore cached pages. See https://discuss.hotwired.dev/t/before-cache-render-event/4928/4
         if (options?.nocache && event.target?.hasAttribute('data-turbo-preview')) return false;
         const urls = normalizeToRegExpArray(options?.urls);
-        if (urls.length > 0 && !urls.some(reg => reg.test(lastUrlLoaded) && !(reg.lastIndex = 0))) return false;
+        if (urls.length > 0 && !urls.some(reg => reg.test(url) && !(reg.lastIndex = 0))) return false;
         const ids = normalizeToStringSet(options?.targetIds);
         return !(ids.size > 0 && (options?.checkDocumentIds && !ids.values().some(id => document.getElementById(id)) || !ids.has(event.target.id)));
+    }
 
     }
 
