@@ -28,15 +28,19 @@ The `wkof.turbo` object has the following properties and methods:
 > - `add_event_listener(eventName, listener, options)`
 >   - returns: `boolean`
 >      - `true`: when the listener was successfully added.
->          - Note that in the "load" special case, this currently returns `true` despite not adding a listener.
 >      - `false`: when the inputs were invalid.
+>      - Note that in the "load" special case (explained below), a listener is not added, and this instead returns `true` or `false` depending on whether the callback was successfully fired immediately.
 > - `remove_event_listener(eventName, listener, options)`
 >    - returns: `boolean`
 >      - `true`: when the listener was removed successfully.
 >      - `false`: when the inputs were invalid or when no active listener matching the parameters is found.
 > - `on`
->   - `common`: contains convenience functions for common use cases.
+>   - `common`
+>      - Contains non-writable convenience functions for common use cases.
+>      - For the return values of all except `events(eventList, callback, options)`, see `add_event_listener(eventName, listener, options)`
 >      - `events(eventList, callback, options)`
+>         - returns: `[]`
+>           - Each entry contains an object with properties `name: string` and `added: boolean`, indicating the result of each item in `eventList`.
 >      - `urls(callback, urls)`
 >      - `dashboard(callback)`
 >      - `items_pages(callback)`
@@ -44,30 +48,33 @@ The `wkof.turbo` object has the following properties and methods:
 >      - `lessons_picker(callback)`
 >      - `lessons_quiz(callback)`
 >      - `reviews(callback)`
->   - `event`: contains functions to set listeners for each of the Turbo events.
->      - `click(callback, urls, options)`
->      - `before_visit(callback, urls, options)`
->      - `visit(callback, urls, options)`
+>   - `event` (Frozen object)
+>      - Contains functions to set listeners for each of the Turbo events.
+>      - For the return values, see `add_event_listener(eventName, listener, options)`
 >      - `before_cache(callback, urls, options)`
->      - `before_render(callback, urls, options)`
->      - `render(callback, urls, options)`
->      - `load(callback, urls, options)`
->      - `morph(callback, urls, options)`
->      - `before_morph_element(callback, urls, options)`
->      - `before_morph_attribute(callback, urls, options)`
->      - `morph_element(callback, urls, options)`
->      - `submit_start(callback, urls, options)`
->      - `submit_end(callback, urls, options)`
->      - `before_frame_render(callback, urls, options)`
->      - `frame_render(callback, urls, options)`
->      - `frame_load(callback, urls, options)`
->      - `frame_missing(callback, urls, options)`
->      - `before_stream_render(callback, urls, options)`
 >      - `before_fetch_request(callback, urls, options)`
 >      - `before_fetch_response(callback, urls, options)`
+>      - `before_frame_render(callback, urls, options)`
+>      - `before_morph_attribute(callback, urls, options)`
+>      - `before_morph_element(callback, urls, options)`
 >      - `before_prefetch(callback, urls, options)`
+>      - `before_render(callback, urls, options)`
+>      - `before_stream_render(callback, urls, options)`
+>      - `before_visit(callback, urls, options)`
+>      - `click(callback, urls, options)`
 >      - `fetch_request_error(callback, urls, options)`
-> - `events`
+>      - `frame_load(callback, urls, options)`
+>      - `frame_missing(callback, urls, options)`
+>      - `frame_render(callback, urls, options)`
+>      - `load(callback, urls, options)`
+>      - `morph(callback, urls, options)`
+>      - `morph_element(callback, urls, options)`
+>      - `render(callback, urls, options)`
+>      - `submit_end(callback, urls, options)`
+>      - `submit_start(callback, urls, options)`
+>      - `visit(callback, urls, options)`
+> - `events` (Frozen object)
+>   -  Each of these also has a `handler` property, which is used internally to handle the event. 
 >   - `click`
 >      - `source: 'document'`
 >      - `name: 'turbo:click'`
@@ -135,7 +142,7 @@ The `wkof.turbo` object has the following properties and methods:
 >      - `source: 'httpRequests'`
 >      - `name: 'turbo:fetch-request-error'`
 > - `common`
->   - `locations`: contains `RegExp` objects to match against the URLs for typical pages.
+>   - `locations`: contains non-writable `RegExp` objects to match against the URLs for typical pages.
 >      - `dashboard`
 >      - `items_pages`
 >      - `lessons`
@@ -149,6 +156,10 @@ The `wkof.turbo` object has the following properties and methods:
 
 
 
+- The callback function is passed the arguments `(event, url)` for all Turbo events.
+  - The `event` parameter is the event object, passed straight from the event triggered.
+  - The `url` parameter is a URL string, which has been parsed from the event, using predetermined logic to detect the URL most likely of use to the end user. This URL is associated with the details of the triggered event, usually referencing the result of whatever action has transpired.
+  - For the special case "load" event (discussed below), `event` contains the string "load" and `url` contains a string of the current page URL.
 - **Always** set the `@match` userscript directive to `https://www.wanikani.com/*` or equivalent.
     - Otherwise, the script may not end up running if the user refreshes the page somewhere unexpected.
 
@@ -164,8 +175,7 @@ Typical usage involves one of the following:
 
 
 - "load" (not to be confused with "turbo:load") is a special use case event name.
-  - Adding a listener for that event via this library causes it to execute the callback immediately after it is added  
-    in the case that the URL matches and the "turbo:load" event has already fired.
+  - Adding a listener for that event via this library causes it to execute the callback immediately after it is added in the case that the URL matches and the "turbo:load" event has already fired.
 
 
 
@@ -254,8 +264,8 @@ wkof.ready('TurboEvents').then(configurePageHandler);
 
 // The callback function is passed an event argument for all Turbo events. However, it is *not*
 // provided for the special case of the aforementioned "load" event.
-function myFunction(event) {
-    console.log(`myFunction() has run for event "${event?.type ?? 'load'}"`);
+function myFunction(event, url) {
+    console.log(`myFunction() has run for event "${event?.type ?? 'load'}" with url ${url}`);
 }
 
 function configurePageHandler() {
@@ -312,5 +322,10 @@ function configurePageHandler() {
     wkof.turbo.remove_event_listener(wkof.turbo.events.visit, myFunction, options3);
 
     // Listener is still active from the `wkof.turbo.on.event.click(myFunction)` invocation.
+
+    // Add a listener for all turbo events on any URL.
+    // `Object.entries(wkof.turbo.events)` or `Object.values(wkof.turbo.events)` function the same.
+    eventList = wkof.turbo.events;
+    wkof.turbo.on.common.events(eventList, myFunction);
 }
 ```
