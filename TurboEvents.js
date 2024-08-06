@@ -2,7 +2,7 @@
 // @name        Wanikani Open Framework Turbo Events
 // @namespace   https://greasyfork.org/en/users/11878
 // @description Adds helpful methods for dealing with Turbo Events to WaniKani Open Framework
-// @version     2.2.4
+// @version     2.2.5
 // @match       https://www.wanikani.com/*
 // @match       https://preview.wanikani.com/*
 // @author      Inserio
@@ -17,7 +17,7 @@
 (function() {
     'use strict';
 
-    const version = '2.2.4';
+    const version = '2.2.5';
     const turboPrefix = 'turbo:', listenerOptions = {capture: true, once: false, passive: true, signal: undefined}, persistent = false;
     const handleDetailFetchResponseResponseUrl = {listener: async event => await handleEvent(event, event.detail.fetchResponse.response.url), listenerOptions, persistent},
         handleDetailFormSubmissionFetchRequestUrlHref = {listener: async event => await handleEvent(event, event.detail.formSubmission.fetchRequest.url.href), listenerOptions, persistent},
@@ -316,7 +316,8 @@
      */
 
     function addTurboEvents() {
-        const existingTurbo = (window.unsafeWindow || window).wkof.turbo;
+        const unsafeGlobal = window.unsafeWindow || window;
+        const existingTurbo = unsafeGlobal.wkof.turbo;
         const listenersToActivate = [];
         if (existingTurbo) {
             if (!isNewerThan(existingTurbo.version)) return;
@@ -329,7 +330,7 @@
                     listenersToActivate.push(eventName);
                 }
             }
-            delete wkof.turbo;
+            delete unsafeGlobal.wkof.turbo;
         }
 
         wkof.turbo = publishedInterface;
