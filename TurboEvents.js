@@ -2,7 +2,7 @@
 // @name        Wanikani Open Framework Turbo Events
 // @namespace   https://greasyfork.org/en/users/11878
 // @description Adds helpful methods for dealing with Turbo Events to WaniKani Open Framework
-// @version     2.2.3
+// @version     2.2.4
 // @match       https://www.wanikani.com/*
 // @match       https://preview.wanikani.com/*
 // @author      Inserio
@@ -17,6 +17,7 @@
 (function() {
     'use strict';
 
+    const version = '2.2.4';
     const turboPrefix = 'turbo:', listenerOptions = {capture: true, once: false, passive: true, signal: undefined}, persistent = false;
     const handleDetailFetchResponseResponseUrl = {listener: async event => await handleEvent(event, event.detail.fetchResponse.response.url), listenerOptions, persistent},
         handleDetailFormSubmissionFetchRequestUrlHref = {listener: async event => await handleEvent(event, event.detail.formSubmission.fetchRequest.url.href), listenerOptions, persistent},
@@ -102,14 +103,16 @@
         common: {value: commonListeners},
         event: {value: turboListeners},
     });
+    const eventHandlers = {}, internalHandlers = {};
     const publishedInterface = Object.freeze({
         add_event_listener: addEventListener,
         remove_event_listener: removeEventListener,
         on: eventMap,
         events: turboEvents,
         common: common,
+        version,
+        '_.internal': {internalHandlers, eventHandlers}
     });
-    const event_handlers = {}, internal_handlers = {};
     let lastUrlLoaded = '!';
 
     /**
@@ -129,18 +132,18 @@
         }
         const eventKey = eventName.slice(turboPrefix.length).replaceAll('-', '_');
         if (!(eventKey in turboEvents)) return false;
-        if (!internal_handlers[eventName]?.active) addInternalEventListener(eventName, turboEvents[eventKey].handler, true);
-        if (!(eventName in event_handlers)) event_handlers[eventName] = new Map();
-        event_handlers[eventName].set(listener, options);
+        if (!internalHandlers[eventName]?.active) addInternalEventListener(eventName, turboEvents[eventKey].handler, true);
+        if (!(eventName in eventHandlers)) eventHandlers[eventName] = new Map();
+        eventHandlers[eventName].set(listener, options);
         return true;
     }
 
     function addInternalEventListener(eventName, handler, activate) {
         if (typeof eventName !== 'string') return false;
         let internalHandler;
-        if (eventName in internal_handlers && internal_handlers[eventName].handler.listenerOptions === handler.listenerOptions)
-            internalHandler = internal_handlers[eventName];
-        else internalHandler = internal_handlers[eventName] = {handler, active: false};
+        if (eventName in internalHandlers && internalHandlers[eventName].handler.listenerOptions === handler.listenerOptions)
+            internalHandler = internalHandlers[eventName];
+        else internalHandler = internalHandlers[eventName] = {handler, active: false};
 
         if (activate && !internalHandler.active) {
             document.documentElement.addEventListener(eventName, handler.listener, handler.listenerOptions);
@@ -176,8 +179,8 @@
     function removeEventListener(eventName, listener, options) {
         if (listener == null) return false;
         if (typeof eventName === 'object' && 'name' in eventName) eventName = eventName.name;
-        if (typeof eventName !== 'string' || !(eventName in event_handlers)) return false;
-        const handlers = event_handlers[eventName];
+        if (typeof eventName !== 'string' || !(eventName in eventHandlers)) return false;
+        const handlers = eventHandlers[eventName];
         if (!handlers.has(listener)) return false;
         const listenerOptions = handlers.get(listener);
         if (deepEqual(listenerOptions, options)) {
@@ -190,12 +193,12 @@
 
     function removeInternalEventListener(eventName) {
         if (typeof eventName !== 'string') return false;
-        if (!(eventName in internal_handlers)) return false;
-        const {handler, active} = internal_handlers[eventName];
+        if (!(eventName in internalHandlers)) return false;
+        const {handler, active} = internalHandlers[eventName];
         if (handler.persistent || !active) return false;
         document.documentElement.removeEventListener(eventName, handler.listener, handler.listenerOptions);
-        internal_handlers[eventName].active = false;
-        delete internal_handlers[eventName];
+        internalHandlers[eventName].active = false;
+        delete internalHandlers[eventName];
         return true;
     }
 
@@ -230,8 +233,8 @@
     }
 
     function * getEventHandlers(event, url) {
-        if (event === undefined || event === null || !(event.type in event_handlers)) return;
-        for (const [listener, options] of event_handlers[event.type])
+        if (event === undefined || event === null || !(event.type in eventHandlers)) return;
+        for (const [listener, options] of eventHandlers[event.type])
             yield emitHandler(event, url, listener, options);
     }
 
@@ -302,6 +305,10 @@
         return !(ids.size > 0 && (options?.checkDocumentIds && !ids.values().some(id => document.getElementById(id)) || !ids.has(event.target.id)));
     }
 
+    function isNewerThan(otherVersion) {
+        let v1 = version.split(`.`).map(v => parseInt(v));
+        let v2 = otherVersion.split(`.`).map(v => parseInt(v));
+        return v1.reduce((r, v, i) => r ?? (v === v2[i] ? null : (v > (v2[i] || 0))), null) || false;
     }
 
     /**
@@ -309,8 +316,26 @@
      */
 
     function addTurboEvents() {
+        const existingTurbo = (window.unsafeWindow || window).wkof.turbo;
+        const listenersToActivate = [];
+        if (existingTurbo) {
+            if (!isNewerThan(existingTurbo.version)) return;
+            const internal = existingTurbo['_.internal'];
+            if (internal == null) return;
+            Object.assign(eventHandlers,internal.eventHandlers);
+            for (const [eventName, {handler, active}] of Object.entries(internal.internalHandlers)) {
+                if (active) {
+                    document.documentElement.removeEventListener(eventName, handler.listener, handler.listenerOptions);
+                    listenersToActivate.push(eventName);
+                }
+            }
+            delete wkof.turbo;
+        }
+
         wkof.turbo = publishedInterface;
-        for (const key in turboEvents) addInternalEventListener(turboEvents[key].name, turboEvents[key].handler, turboEvents[key].handler.persistent);
+        Object.defineProperty(wkof, "turbo", {writable: false});
+        for (const key in turboEvents)
+            addInternalEventListener(turboEvents[key].name, turboEvents[key].handler, turboEvents[key].handler.persistent || listenersToActivate.includes(turboEvents[key].name));
     }
 
     function startup() {
