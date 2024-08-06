@@ -79,7 +79,7 @@
         submit_start:           (callback, options) => addEventListener(turboEvents.submit_start.name, callback, options),
         visit:                  (callback, options) => addEventListener(turboEvents.visit.name, callback, options),
     });
-    const common = Object.defineProperty({},{
+    const common = Object.defineProperties({},{
         locations: {value: Object.defineProperties({}, {
             dashboard: {value: /^https:\/\/www\.wanikani\.com(\/dashboard.*)?\/?$/},
             items_pages: {value: /^https:\/\/www\.wanikani\.com\/(radicals|kanji|vocabulary)\/.+\/?$/},
