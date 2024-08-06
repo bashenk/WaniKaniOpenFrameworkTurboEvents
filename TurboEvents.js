@@ -244,10 +244,10 @@
         if (options?.nocache && event.target?.hasAttribute('data-turbo-preview')) return;
         const urlRegExes = normalizeUrls(options?.urls);
         if (urlRegExes?.length > 0 && !urlRegExes.find(reg => reg.test(url))) return;
+        if (options?.once) removeEventListener(event.type, listener, options);
         // yield a promise for each listener
         if (!options?.noTimeout) await nextEventLoopTick();
         listener(event, url);
-        if (options?.once) removeEventListener(event.type, listener, options);
     }
 
     function nextEventLoopTick() {
