@@ -2,7 +2,7 @@
 // @name        Wanikani Open Framework Turbo Events
 // @namespace   https://greasyfork.org/en/users/11878
 // @description Adds helpful methods for dealing with Turbo Events to WaniKani Open Framework
-// @version     2.2.0
+// @version     2.2.1
 // @match       https://www.wanikani.com/*
 // @match       https://preview.wanikani.com/*
 // @author      Inserio
@@ -79,8 +79,8 @@
         submit_start:           (callback, options) => addEventListener(turboEvents.submit_start.name, callback, options),
         visit:                  (callback, options) => addEventListener(turboEvents.visit.name, callback, options),
     });
-    const common = {
-        locations: Object.defineProperties({},{
+    const common = Object.defineProperty({},{
+        locations: {value: Object.defineProperties({}, {
             dashboard: {value: /^https:\/\/www\.wanikani\.com(\/dashboard.*)?\/?$/},
             items_pages: {value: /^https:\/\/www\.wanikani\.com\/(radicals|kanji|vocabulary)\/.+\/?$/},
             lessons: {value: /^https:\/\/www\.wanikani\.com\/subject-lessons\/(start|[\d-]+\/\d+)\/?$/},
@@ -88,7 +88,7 @@
             lessons_quiz: {value: /^https:\/\/www\.wanikani\.com\/subject-lessons\/[\d-]+\/quiz.*\/?$/},
             reviews: {value: /^https:\/\/www\.wanikani\.com\/subjects\/review.*\/?$/},
         }),
-    }, commonListeners = Object.defineProperties({},{
+    }}), commonListeners = Object.defineProperties({},{
         events:         {value: (eventList, callback, options) => addMultipleEventListeners(eventList, callback, options)},
         urls:           {value: (callback, urls) => addTypicalPageListener(callback, urls)},
         dashboard:      {value: callback => addTypicalPageListener(callback, common.locations.dashboard)},
