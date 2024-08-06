@@ -243,7 +243,7 @@
         // Ignore cached pages. See https://discuss.hotwired.dev/t/before-cache-render-event/4928/4
         if (options?.nocache && event.target?.hasAttribute('data-turbo-preview')) return;
         const urlRegExes = normalizeUrls(options?.urls);
-        if (urlRegExes?.length > 0 && !urlRegExes.find(reg => reg.test(url))) return;
+        if (urlRegExes?.length > 0 && !urlRegExes.find(reg => reg.test(url) && !(reg.lastIndex = 0))) return;
         if (options?.once) removeEventListener(event.type, listener, options);
         // yield a promise for each listener
         if (!options?.noTimeout) await nextEventLoopTick();
