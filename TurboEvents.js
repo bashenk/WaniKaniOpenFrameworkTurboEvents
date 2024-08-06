@@ -91,6 +91,7 @@
     }}), commonListeners = Object.defineProperties({},{
         events:         {value: (eventList, callback, options) => addMultipleEventListeners(eventList, callback, options)},
         urls:           {value: (callback, urls) => addTypicalPageListener(callback, urls)},
+        targetIds:      {value: (callback, targetIds) => addTypicalFrameListener(callback, targetIds)},
         dashboard:      {value: callback => addTypicalPageListener(callback, common.locations.dashboard)},
         items_pages:    {value: callback => addTypicalPageListener(callback, common.locations.items_pages)},
         lessons:        {value: callback => addTypicalPageListener(callback, common.locations.lessons)},
@@ -122,9 +123,7 @@
         if (eventName === null) return false;
 
         if (eventName === 'load') {
-            if (typeof listener !== 'function' || lastUrlLoaded === '!') return false;
-            const urls = normalizeUrls(options?.urls);
-            if (urls?.length > 0 && !urls.find(url => url.test(lastUrlLoaded))) return false;
+            if (typeof listener !== 'function' || lastUrlLoaded === '!' || !verifyOptions('load', lastUrlLoaded, Object.assign({checkDocumentIds: true}, options))) return false;
             listener('load', lastUrlLoaded);
             return true;
         }
@@ -165,12 +164,17 @@
 
     // Add a typical listener to run for the provided urls.
     function addTypicalPageListener(callback, urls) {
-        return commonListeners.events(['load', turboEvents.load.name], callback, {urls, noTimeout: false});
+        return commonListeners.events(['load', turboEvents.load.name], callback, {urls});
+    }
+
+    // Add a typical listener to run for the provided urls.
+    function addTypicalFrameListener(callback, targetIds) {
+        return turboListeners.frame_load(callback, {targetIds});
     }
 
     // Removes an event listener previously registered with addEventListener().
     function removeEventListener(eventName, listener, options) {
-        if (listener === undefined || listener === null) return false;
+        if (listener == null) return false;
         if (typeof eventName === 'object' && 'name' in eventName) eventName = eventName.name;
         if (typeof eventName !== 'string' || !(eventName in event_handlers)) return false;
         const handlers = event_handlers[eventName];
@@ -239,13 +243,10 @@
         return eventName;
     }
 
+    // Yield a promise for each listener
     async function emitHandler(event, url, listener, options) {
-        // Ignore cached pages. See https://discuss.hotwired.dev/t/before-cache-render-event/4928/4
-        if (options?.nocache && event.target?.hasAttribute('data-turbo-preview')) return;
-        const urlRegExes = normalizeUrls(options?.urls);
-        if (urlRegExes?.length > 0 && !urlRegExes.find(reg => reg.test(url) && !(reg.lastIndex = 0))) return;
+        if (!verifyOptions(event, url, options)) return;
         if (options?.once) removeEventListener(event.type, listener, options);
-        // yield a promise for each listener
         if (!options?.noTimeout) await nextEventLoopTick();
         listener(event, url);
     }
@@ -254,14 +255,54 @@
         return new Promise(resolve => setTimeout(() => resolve(), 0));
     }
 
-    function normalizeUrls(urls) {
-        if (urls === undefined || urls === null) return null;
-        if (!Array.isArray(urls)) urls = [urls];
-        return urls.reduce((acc, url) => {
-            if (url instanceof RegExp) acc.push(url);
-            if (typeof url === 'string') acc.push(new RegExp(url.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replaceAll('*', '.*')));
-            return acc;
-        }, []);
+    /**
+     * Normalizes the input `strings` into a Set of strings.
+     *
+     * @param {(any|any[]|Set<any>|null|undefined)} strings - The input strings to be normalized.
+     * @return {Set<string>} A Set of strings containing the string values from the input.
+     */
+    function normalizeToStringSet(strings) {
+        const output = new Set();
+        if (strings === undefined || strings === null) return output;
+        if (strings instanceof Set) {
+            for (const str of strings)
+                if (typeof str === 'string')
+                    output.add(str);
+            return output;
+        }
+        if (!Array.isArray(strings)) strings = [strings];
+        for (const str of strings) {
+            if (typeof str === 'string')
+                output.add(str);
+        }
+        return output;
+    }
+
+    /**
+     * Normalizes the input object `input` into an array of RegExp objects.
+     *
+     * @param {(any|any[]|null|undefined)} input - The input to be normalized.
+     * @return {RegExp[]} An array of RegExp objects containing input values coerced into RegExp objects.
+     */
+    function normalizeToRegExpArray(input) {
+        const output = [];
+        if (input === undefined || input === null) return output;
+        if (!Array.isArray(input)) input = [input];
+        for (const url of input) {
+            if (url instanceof RegExp) output.push(url);
+            else if (typeof url === 'string') output.push(new RegExp(url.replaceAll(/[.+?^${}()|[\]\\]/g, '\\$&').replaceAll('*', '.*')));
+        }
+        return output;
+    }
+
+    function verifyOptions(event, url, options) {
+        // Ignore cached pages. See https://discuss.hotwired.dev/t/before-cache-render-event/4928/4
+        if (options?.nocache && event.target?.hasAttribute('data-turbo-preview')) return false;
+        const urls = normalizeToRegExpArray(options?.urls);
+        if (urls.length > 0 && !urls.some(reg => reg.test(lastUrlLoaded) && !(reg.lastIndex = 0))) return false;
+        const ids = normalizeToStringSet(options?.targetIds);
+        return !(ids.size > 0 && (options?.checkDocumentIds && !ids.values().some(id => document.getElementById(id)) || !ids.has(event.target.id)));
+
     }
 
     /**
