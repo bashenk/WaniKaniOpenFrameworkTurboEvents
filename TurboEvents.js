@@ -170,7 +170,7 @@
         return commonListeners.events(['load', turboEvents.load.name], callback, {urls});
     }
 
-    // Add a typical listener to run for the provided urls.
+    // Add a typical listener to run for the provided ids.
     function addTypicalFrameListener(callback, targetIds) {
         return turboListeners.frame_load(callback, {targetIds});
     }
