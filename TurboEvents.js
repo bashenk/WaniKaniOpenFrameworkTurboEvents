@@ -2,7 +2,7 @@
 // @name        Wanikani Open Framework Turbo Events
 // @namespace   https://greasyfork.org/en/users/11878
 // @description Adds helpful methods for dealing with Turbo Events to WaniKani Open Framework
-// @version     2.2.2
+// @version     2.2.3
 // @match       https://www.wanikani.com/*
 // @match       https://preview.wanikani.com/*
 // @author      Inserio
@@ -244,15 +244,13 @@
     }
 
     // Yield a promise for each listener
-    async function emitHandler(event, url, listener, options) {
-        if (!verifyOptions(event, url, options)) return;
+    function emitHandler(event, url, listener, options) {
+        if (!verifyOptions(event, url, options)) return Promise.resolve();
         if (options?.once) removeEventListener(event.type, listener, options);
-        if (!options?.noTimeout) await nextEventLoopTick();
-        listener(event, url);
-    }
-
-    function nextEventLoopTick() {
-        return new Promise(resolve => setTimeout(() => resolve(), 0));
+        return new Promise(resolve => {
+            if (!options?.noTimeout) setTimeout(()=> resolve(listener(event,url)), 0);
+            else resolve(listener(event, url));
+        });
     }
 
     /**
