@@ -232,6 +232,20 @@
         return Object.freeze(o);
     }
 
+
+    function didConfirmWarning() {
+        const message = `It looks like a script is using an incompatible version of the WaniKani Open Framework Turbo Events library.
+Setup will continue anyway, but some unexpected behavior may occur.
+
+Press "OK" to hide this message for 7 days.
+Press "Cancel" to be reminded again next time.`;
+        return confirm(message);
+    }
+
+    function getCookie(cname) {
+        return decodeURIComponent(window.document.cookie).split(';').find(s=>s.trimStart().startsWith(cname))?.substring(cname.trimStart().length+2); // 'key=value', thus +2
+    }
+
     function * getEventHandlers(event, url) {
         if (event === undefined || event === null || !(event.type in eventHandlers)) return;
         for (const [listener, options] of eventHandlers[event.type])
@@ -296,6 +310,12 @@
         return output;
     }
 
+    function setCookie(cname, value, expiry) {
+        const {days, hours, minutes, seconds} = Object.assign({days:0, hours:0, minutes:0, seconds:0},expiry);
+        const expires = (new Date(Date.now()+(days*24*60*60*1000)+(hours*60*60*1000)+(minutes*60*1000)+(seconds*1000))).toUTCString();
+        window.document.cookie = `${cname}=${value};expires=${expires};path=/;SameSite=None;Secure;`;
+    }
+
     function verifyOptions(event, url, options) {
         // Ignore cached pages. See https://discuss.hotwired.dev/t/before-cache-render-event/4928/4
         if (options?.nocache && event.target?.hasAttribute('data-turbo-preview')) return false;
@@ -306,8 +326,9 @@
     }
 
     function isNewerThan(otherVersion) {
-        let v1 = version.split(`.`).map(v => parseInt(v));
-        let v2 = otherVersion.split(`.`).map(v => parseInt(v));
+        if (otherVersion == null) return true;
+        const v1 = version.split(`.`).map(v => parseInt(v)),
+            v2 = otherVersion.split(`.`).map(v => parseInt(v));
         return v1.reduce((r, v, i) => r ?? (v === v2[i] ? null : (v > (v2[i] || 0))), null) || false;
     }
 
@@ -315,28 +336,45 @@
      * Initialization
      */
 
+    /** Adds Turbo Events to the wkof object, updating the version and adding internal event listeners. */
     function addTurboEvents() {
+        const listenersToActivate = removeExistingTurboVersion();
+        wkof.turbo = publishedInterface;
+        Object.defineProperty(wkof, "turbo", {writable: false});
+        for (const key in turboEvents)
+            addInternalEventListener(turboEvents[key].name, turboEvents[key].handler, turboEvents[key].handler.persistent || listenersToActivate.has(turboEvents[key].name));
+        return Promise.resolve();
+    }
+
+    /**
+     * Removes any existing Turbo version and returns the existing active listeners.
+     *
+     * @return {Set<string>} A set of the event names for any existing active listeners.
+     */
+    function removeExistingTurboVersion() {
+        const existingActiveListeners = new Set();
         const unsafeGlobal = window.unsafeWindow || window;
         const existingTurbo = unsafeGlobal.wkof.turbo;
-        const listenersToActivate = [];
         if (existingTurbo) {
-            if (!isNewerThan(existingTurbo.version)) return;
+            if (!isNewerThan(existingTurbo.version)) return existingActiveListeners;
             const internal = existingTurbo['_.internal'];
-            if (internal == null) return;
-            Object.assign(eventHandlers,internal.eventHandlers);
-            for (const [eventName, {handler, active}] of Object.entries(internal.internalHandlers)) {
-                if (active) {
-                    document.documentElement.removeEventListener(eventName, handler.listener, handler.listenerOptions);
-                    listenersToActivate.push(eventName);
+            if (internal == null) {
+                const cookieKey = 'turbo_library_warning_seen';
+                if (!getCookie(cookieKey) && didConfirmWarning())
+                    setCookie(cookieKey, 'Y', {seconds: 7});
+            } else {
+                Object.assign(eventHandlers, internal.eventHandlers);
+                for (const [eventName, {handler, active}] of Object.entries(internal.internalHandlers)) {
+                    if (active) {
+                        document.documentElement.removeEventListener(eventName, handler.listener, handler.listenerOptions);
+                        existingActiveListeners.add(eventName);
+                    }
                 }
             }
             delete unsafeGlobal.wkof.turbo;
         }
 
-        wkof.turbo = publishedInterface;
-        Object.defineProperty(wkof, "turbo", {writable: false});
-        for (const key in turboEvents)
-            addInternalEventListener(turboEvents[key].name, turboEvents[key].handler, turboEvents[key].handler.persistent || listenersToActivate.includes(turboEvents[key].name));
+        return existingActiveListeners;
     }
 
     function startup() {
