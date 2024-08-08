@@ -130,7 +130,6 @@
      * @prop {(string|string[]|Set<string>)} [targetIds] - The target IDs to be verified against the event target ID. If not specified, defaults to an empty `Set`.
      * @prop {boolean} [useDocumentIds] - Indicates whether to check the IDs of the document element in addition to the event target for the `targetIds`. If not specified, defaults to `false`.
      * @prop {boolean} [nocache] - Indicates whether to ignore events involving Turbo's cached pages. See {@link https://discuss.hotwired.dev/t/before-cache-render-event/4928/4}. If not specified, defaults to `false`.
-     * @prop {boolean} [persistent] - Indicates that the listener should not be removed even when instructed. Is only used internally and any other usage is completely ignored. If `true`, the `once` option is ignored. If not specified, defaults to `false`.
      * @prop {boolean} [once] - Indicates that the listener should be invoked at most once after being added. If `true`, the listener would be automatically removed when invoked. If not specified, defaults to `false`.
      * @prop {boolean} [capture] - Indicates that events of this type will be dispatched to the registered listener before being dispatched to any `EventTarget` beneath it in the DOM tree. If not specified, defaults to `false`.
      * @prop {boolean} [passive] - If `true`, indicates that the function specified by listener will never call `preventDefault()`. If a passive listener does call `preventDefault()`, the user agent will do nothing other than generate a console warning.  If not specified, defaults to `false` – except that in browsers other than Safari, it defaults to `true` for wheel, mousewheel, touchstart and touchmove events.
@@ -173,7 +172,7 @@
         if (!(eventName in internalHandlers)) internalHandlers[eventName] = {};
         else if (internalHandlers[eventName][key]) return false;
         options = {capture: options.capture, once: false, passive: false, signal: undefined}; // TODO: Determine if `once`|`signal` can be passed here without causing issues.
-        internalHandlers[eventName][key] = {handler, options, persistent: options.persistent ?? false};
+        internalHandlers[eventName][key] = {handler, options};
         document.documentElement.addEventListener(eventName, handler, options);
         return true;
     }
@@ -247,8 +246,7 @@
     function removeInternalEventListener(eventName) {
         if (typeof eventName !== 'string') return false;
         if (!(eventName in internalHandlers)) return false;
-        const {handler, options, persistent} = internalHandlers[eventName];
-        if (persistent) return false;
+        const {handler, options} = internalHandlers[eventName];
         document.documentElement.removeEventListener(eventName, handler, options);
         delete internalHandlers[eventName];
         return true;
@@ -344,7 +342,6 @@ Press "Cancel" to be reminded again next time.`;
      * @param {boolean} [input.nocache=false] - Indicates whether to ignore events for Turbo's cached version of pages.
      * @param {boolean} [input.once=false] - Indicates that the listener should be invoked at most once after being added.
      * @param {boolean} [input.passive=false] - If `true`, indicates that the function specified by listener will never call `preventDefault()`.
-     * @param {boolean} [input.persistent=false] - Indicates that the listener should not be removed even when instructed
      * @param {AbortSignal} [input.signal] - The listener will be removed when the given `AbortSignal` object's `abort()` method is called. If not specified, no `AbortSignal` is associated with the listener.
      * @param {(string|string[]|Set<string>)} [input.targetIds] - The target IDs to be verified against the event target ID. If not specified, defaults to an empty `Set`.
      * @param {(string|RegExp|Array<string|RegExp>)} [input.urls] - The URLs to be verified against the URL parameter. If not specified, defaults to an empty array.
@@ -358,7 +355,6 @@ Press "Cancel" to be reminded again next time.`;
                 nocache: false,
                 once: false,
                 passive: false,
-                persistent: false,
                 signal: undefined,
                 targetIds: undefined,
                 urls: undefined,
