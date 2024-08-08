@@ -330,17 +330,6 @@ Press "Cancel" to be reminded again next time.`;
     function * getEventListeners(event, url) {
         if (event === undefined || event === null || !(event.type in eventHandlers)) return;
         for (const {listener, options} of eventHandlers[event.type]) {
-            switch (event.eventPhase) {
-                case Event.CAPTURING_PHASE:
-                    console.log(event.type,"CAPTURING_PHASE Event", event);
-                    break;
-                case Event.AT_TARGET:
-                    console.log(event.type,"AT_TARGET Event", event);
-                    break;
-                case Event.BUBBLING_PHASE:
-                    console.log(event.type,"AT_TARGET Event", event);
-                    break;
-            }
             yield emitListener(event, url, listener, options);
         }
     }
