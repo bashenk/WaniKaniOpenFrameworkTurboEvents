@@ -18,7 +18,7 @@
 (function() {
     'use strict';
 
-    const version = '3.0.0', turboPrefix = 'turbo:', eventHandlers = {}, internalHandlers = {},
+    const version = '3.0.3', turboPrefix = 'turbo:', eventHandlers = {}, internalHandlers = {},
         handleDetailFetchResponseResponseUrl = async event => await handleTurboEvent(event, event.detail.fetchResponse.response.url),
         handleDetailFormSubmissionFetchRequestUrlHref = async event => await handleTurboEvent(event, event.detail.formSubmission.fetchRequest.url.href),
         handleDetailNewElementBaseURI = async event => await handleTurboEvent(event, event.detail.newElement.baseURI),
