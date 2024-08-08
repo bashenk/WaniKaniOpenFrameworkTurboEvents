@@ -2,7 +2,7 @@
 // @name        Wanikani Open Framework Turbo Events
 // @namespace   https://greasyfork.org/en/users/11878
 // @description Adds helpful methods for dealing with Turbo Events to WaniKani Open Framework
-// @version     3.0.3
+// @version     3.0.4
 // @match       https://www.wanikani.com/*
 // @match       https://preview.wanikani.com/*
 // @author      Inserio
@@ -18,7 +18,7 @@
 (function() {
     'use strict';
 
-    const version = '3.0.3', turboPrefix = 'turbo:', eventHandlers = {}, internalHandlers = {},
+    const version = '3.0.4', turboPrefix = 'turbo:', eventHandlers = {}, internalHandlers = {}, emptyArray = Object.freeze([]),
         handleDetailFetchResponseResponseUrl = async event => await handleTurboEvent(event, event.detail.fetchResponse.response.url),
         handleDetailFormSubmissionFetchRequestUrlHref = async event => await handleTurboEvent(event, event.detail.formSubmission.fetchRequest.url.href),
         handleDetailNewElementBaseURI = async event => await handleTurboEvent(event, event.detail.newElement.baseURI),
@@ -239,16 +239,18 @@
         const handler = handlers.find(({listener: existingListener, options: existingOptions}) => listener === existingListener && deepEqual(options, existingOptions));
         if (!handler) return false;
         handlers.splice(handlers.indexOf(handler), 1);
-        if (handlers.length === 0) removeInternalEventListener(eventName);
+        if (handlers.length === 0) removeInternalEventListener(eventName, options);
         return true;
     }
 
-    function removeInternalEventListener(eventName) {
+    function removeInternalEventListener(eventName, options) {
         if (typeof eventName !== 'string') return false;
         if (!(eventName in internalHandlers)) return false;
-        const {handler, options} = internalHandlers[eventName];
-        document.documentElement.removeEventListener(eventName, handler, options);
-        delete internalHandlers[eventName];
+        const key = options.capture ? 'capture' : 'bubble';
+        if (!(key in internalHandlers[eventName])) return false;
+        const {handler, options: existingOptions} = internalHandlers[eventName][key];
+        document.documentElement.removeEventListener(eventName, handler, existingOptions);
+        delete internalHandlers[eventName][key];
         return true;
     }
 
@@ -414,9 +416,9 @@ Press "Cancel" to be reminded again next time.`;
      * @return {RegExp[]} An array of RegExp objects containing input values coerced into RegExp objects.
      */
     function normalizeToRegExpArray(input) {
+        if (input === undefined || input === null) return emptyArray;
         if (Array.isArray(input) && input.every(val => val instanceof RegExp)) return input;
         const output = [];
-        if (input === undefined || input === null) return output;
         if (!Array.isArray(input)) input = [input];
         for (const url of input) {
             if (url instanceof RegExp) output.push(url);
