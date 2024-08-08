@@ -2,7 +2,7 @@
 // @name        Wanikani Open Framework Turbo Events
 // @namespace   https://greasyfork.org/en/users/11878
 // @description Adds helpful methods for dealing with Turbo Events to WaniKani Open Framework
-// @version     3.0.2
+// @version     3.0.3
 // @match       https://www.wanikani.com/*
 // @match       https://preview.wanikani.com/*
 // @author      Inserio
@@ -462,16 +462,18 @@ Press "Cancel" to be reminded again next time.`;
      */
     function addTurboEvents() {
         const listenersToActivate = removeExistingTurboVersion();
-        if (listenersToActivate == null) return Promise.resolve();
+        if (listenersToActivate === null) return Promise.resolve();
         wkof.turbo = publishedInterface;
         Object.defineProperty(wkof, "turbo", {writable: false});
         // Keep this one out of the internal event handler list because it does not propagate events to the handlers
         document.documentElement.addEventListener(turboEvents.load.name, handleUpdateLoadedPage, {capture: false, passive: true, once: false});
 
-        for (const {name, options} in listenersToActivate) {
-            const eventKey = name.slice(turboPrefix.length).replaceAll('-', '_');
-            const {handler} = turboEvents[eventKey];
-            addInternalEventListener(name, handler, options);
+        if (listenersToActivate !== undefined) {
+            for (const {name, options} in listenersToActivate) {
+                const eventKey = name.slice(turboPrefix.length).replaceAll('-', '_');
+                const {handler} = turboEvents[eventKey];
+                addInternalEventListener(name, handler, options);
+            }
         }
         return Promise.resolve();
     }
@@ -479,12 +481,13 @@ Press "Cancel" to be reminded again next time.`;
     /**
      * Removes any existing Turbo version and returns the existing active listeners.
      *
-     * @return {Map<string, object>|null} A map of the event names for any existing active listeners and their listener options, or null if the current version is not newer than the existing version or if there is no existing version.
+     * @return {Map<string, object>|null|undefined} A map of the event names for any existing active listeners and their listener options, or null if the current version is not newer than the existing version, or undefined if there is no existing version.
      */
     function removeExistingTurboVersion() {
         const unsafeGlobal = window.unsafeWindow || window;
         const existingTurbo = unsafeGlobal.wkof.turbo;
-        if (!existingTurbo || !isNewerThan(existingTurbo.version)) return null;
+        if (!existingTurbo) return undefined;
+        else if (!isNewerThan(existingTurbo.version)) return null;
         const internal = existingTurbo['_.internal'];
         const existingActiveListeners = new Map();
         if (internal == null) {
