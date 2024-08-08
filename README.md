@@ -41,13 +41,14 @@ The `wkof.turbo` object has the following properties and methods:
 >      - `events(eventList, callback, options)`
 >         - returns: `[]`
 >           - Each entry contains an object with properties `name: string` and `added: boolean`, indicating the result of each item in `eventList`.
->      - `urls(callback, urls)`
->      - `dashboard(callback)`
->      - `items_pages(callback)`
->      - `lessons(callback)`
->      - `lessons_picker(callback)`
->      - `lessons_quiz(callback)`
->      - `reviews(callback)`
+>      - `urls(callback, urls, options)`
+>      - `targetIds(callback, targetIds, options)`
+>      - `dashboard(callback, options)`
+>      - `items_pages(callback, options)`
+>      - `lessons(callback, options)`
+>      - `lessons_picker(callback, options)`
+>      - `lessons_quiz(callback, options)`
+>      - `reviews(callback, options)`
 >   - `event` (Frozen object)
 >      - Contains functions to set listeners for each of the Turbo events.
 >      - For the return values, see `add_event_listener(eventName, listener, options)`
@@ -176,6 +177,27 @@ Typical usage involves one of the following:
 
 - "load" (not to be confused with "turbo:load") is a special use case event name.
   - Adding a listener for that event via this library causes it to execute the callback immediately after it is added in the case that the URL matches and the "turbo:load" event has already fired.
+
+
+#### The "options" parameter
+
+
+All the events provided have an optional options parameter
+that functions somewhat as an extension of the `AddEventListenerOptions`|`EventListenerOptions` parameters given to `EventTarget.addEventListener()`.
+The following table is a full description of the options available.
+
+|    Property    |                    Type                     | Supported | Description                                                                                                                                                                                                                                                                                                                                                                                     |
+|:--------------:|:-------------------------------------------:|:---------:|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|      urls      | `string \| RegExp \| Array<string\|RegExp>` |    yes    | The URLs to be verified against the URL parameter.<br/>If not specified, defaults to an empty `Array`.                                                                                                                                                                                                                                                                                          |
+|   targetIds    |     `string \| string[] \| Set<string>`     |    yes    | The target IDs to be verified against the event target ID.<br/>If not specified, defaults to an empty `Set`.                                                                                                                                                                                                                                                                                    |
+| useDocumentIds |                  `boolean`                  |    yes    | Indicates whether to check the IDs of the document element in addition to the event target for the targetIds.<br/>If not specified, defaults to `false`.                                                                                                                                                                                                                                        |
+|   noTimeout    |                  `boolean`                  |    yes    | Indicates whether to skip use of `setTimeout(callback,0)`, typically used to let the event settle before invoking the callback.<br/>If not specified, defaults to `false`.                                                                                                                                                                                                                      |
+|    nocache     |                  `boolean`                  |    yes    | Indicates whether to ignore events involving Turbo's cached pages. See https://discuss.hotwired.dev/t/before-cache-render-event/4928/4.<br/>If not specified, defaults to `false`.                                                                                                                                                                                                              |
+|      once      |                  `boolean`                  |    yes    | Indicates that the listener should be invoked at most once after being added. If `true`, the listener would be automatically removed when invoked.<br/>If not specified, defaults to `false`.                                                                                                                                                                                                   |
+|    capture     |                  `boolean`                  |    yes    | Indicates that events of this type will be dispatched to the registered listener before being dispatched to any `EventTarget` beneath it in the DOM tree.<br/>If not specified, defaults to `false`.                                                                                                                                                                                            |
+|    passive     |                  `boolean`                  |    no     | If `true`, indicates that the function specified by listener will never call `preventDefault()`. If a passive listener does call `preventDefault()`, the user agent will do nothing other than generate a console warning.<br/>If not specified, defaults to `false` – except that in browsers other than Safari, it defaults to `true` for wheel, mousewheel, touchstart and touchmove events. |
+|     signal     |                `AbortSignal`                |    no     | The listener will be removed when the given AbortSignal object's `abort()` method is called.<br/>If not specified, no `AbortSignal` is associated with the listener.                                                                                                                                                                                                                            |
+|   persistent   |                  `boolean`                  |    no     | Indicates that the listener should not be removed even when instructed. Is only used internally and any other usage is completely ignored. If `true`, the `once` option is ignored.<br/>If not specified, defaults to `false`.                                                                                                                                                                  |
 
 
 
