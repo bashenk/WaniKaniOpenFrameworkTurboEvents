@@ -2,7 +2,7 @@
 // @name        Wanikani Open Framework Turbo Events
 // @namespace   https://greasyfork.org/en/users/11878
 // @description Adds helpful methods for dealing with Turbo Events to WaniKani Open Framework
-// @version     3.0.1
+// @version     3.0.2
 // @match       https://www.wanikani.com/*
 // @match       https://preview.wanikani.com/*
 // @author      Inserio
@@ -462,6 +462,7 @@ Press "Cancel" to be reminded again next time.`;
      */
     function addTurboEvents() {
         const listenersToActivate = removeExistingTurboVersion();
+        if (listenersToActivate == null) return Promise.resolve();
         wkof.turbo = publishedInterface;
         Object.defineProperty(wkof, "turbo", {writable: false});
         // Keep this one out of the internal event handler list because it does not propagate events to the handlers
@@ -478,14 +479,14 @@ Press "Cancel" to be reminded again next time.`;
     /**
      * Removes any existing Turbo version and returns the existing active listeners.
      *
-     * @return {Map<string, object>} A map of the event names for any existing active listeners and their listener options.
+     * @return {Map<string, object>|null} A map of the event names for any existing active listeners and their listener options, or null if the current version is not newer than the existing version or if there is no existing version.
      */
     function removeExistingTurboVersion() {
-        const existingActiveListeners = new Map();
         const unsafeGlobal = window.unsafeWindow || window;
         const existingTurbo = unsafeGlobal.wkof.turbo;
-        if (!existingTurbo || !isNewerThan(existingTurbo.version)) return existingActiveListeners;
+        if (!existingTurbo || !isNewerThan(existingTurbo.version)) return null;
         const internal = existingTurbo['_.internal'];
+        const existingActiveListeners = new Map();
         if (internal == null) {
             const cookieKey = 'turbo_library_warning_seen';
             if (!getCookie(cookieKey) && didConfirmWarning())
