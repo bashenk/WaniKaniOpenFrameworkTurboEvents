@@ -2,7 +2,7 @@
 // @name        Wanikani Open Framework Turbo Events
 // @namespace   https://greasyfork.org/en/users/11878
 // @description Adds helpful methods for dealing with Turbo Events to WaniKani Open Framework
-// @version     3.0.5
+// @version     4.0.0
 // @match       https://www.wanikani.com/*
 // @match       https://preview.wanikani.com/*
 // @author      Inserio
@@ -20,67 +20,145 @@
 (function() {
     'use strict';
 
-    const version = '3.0.5', turboPrefix = 'turbo:', eventHandlers = {}, internalHandlers = {}, emptyArray = Object.freeze([]),
-        handleDetailFetchResponseResponseUrl = async event => await handleTurboEvent(event, event.detail.fetchResponse.response.url),
-        handleDetailFormSubmissionFetchRequestUrlHref = async event => await handleTurboEvent(event, event.detail.formSubmission.fetchRequest.url.href),
-        handleDetailNewElementBaseURI = async event => await handleTurboEvent(event, event.detail.newElement.baseURI),
-        handleDetailNewFrameBaseURI = async event => await handleTurboEvent(event, event.detail.newFrame.baseURI),
-        handleDetailNewStreamUrl = async event => await handleTurboEvent(event, event.detail.newStream.url),
-        handleDetailRequestUrlHref = async event => await handleTurboEvent(event, event.detail.request.url.href),
-        handleDetailResponseUrl = async event => await handleTurboEvent(event, event.detail.response.url),
-        handleDetailUrl = async event => await handleTurboEvent(event, event.detail.url),
-        handleUpdateLoadedPage = event => lastUrlLoaded = event.detail.url,
-        handleDetailUrlHref = async event => await handleTurboEvent(event, event.detail.url.href),
-        handleTargetBaseURI = async event => await handleTurboEvent(event, event.target.baseURI),
-        handleTargetHref = async event => await handleTurboEvent(event, event.target.href);
-    // https://turbo.hotwired.dev/reference/events
-    const turboEvents = deepFreeze({
-        click:                  {source: 'document', name: `${turboPrefix}click`, handler: handleDetailUrl},
-        before_visit:           {source: 'document', name: `${turboPrefix}before-visit`, handler: handleDetailUrl},
-        visit:                  {source: 'document', name: `${turboPrefix}visit`, handler: handleDetailUrl},
-        before_cache:           {source: 'document', name: `${turboPrefix}before-cache`, handler: handleTargetBaseURI},
-        before_render:          {source: 'document', name: `${turboPrefix}before-render`, handler: handleTargetBaseURI},
-        render:                 {source: 'document', name: `${turboPrefix}render`, handler: handleTargetBaseURI},
-        load:                   {source: 'document', name: `${turboPrefix}load`, handler: handleDetailUrl},
-        morph:                  {source: 'pageRefresh', name: `${turboPrefix}morph`, handler: handleDetailNewElementBaseURI},
-        before_morph_element:   {source: 'pageRefresh', name: `${turboPrefix}before-morph-element`, handler: handleTargetBaseURI},
-        before_morph_attribute: {source: 'pageRefresh', name: `${turboPrefix}before-morph-attribute`, handler: handleDetailNewElementBaseURI},
-        morph_element:          {source: 'pageRefresh', name: `${turboPrefix}morph-element`, handler: handleDetailNewElementBaseURI},
-        submit_start:           {source: 'forms', name: `${turboPrefix}submit-start`, handler: handleDetailFormSubmissionFetchRequestUrlHref},
-        submit_end:             {source: 'forms', name: `${turboPrefix}submit-end`, handler: handleDetailFetchResponseResponseUrl},
-        before_frame_render:    {source: 'frames', name: `${turboPrefix}before-frame-render`, handler: handleDetailNewFrameBaseURI},
-        frame_render:           {source: 'frames', name: `${turboPrefix}frame-render`, handler: handleTargetBaseURI},
-        frame_load:             {source: 'frames', name: `${turboPrefix}frame-load`, handler: handleTargetBaseURI},
-        frame_missing:          {source: 'frames', name: `${turboPrefix}frame-missing`, handler: handleDetailResponseUrl},
-        before_stream_render:   {source: 'streams', name: `${turboPrefix}before-stream-render`, handler: handleDetailNewStreamUrl},
-        before_fetch_request:   {source: 'httpRequests', name: `${turboPrefix}before-fetch-request`, handler: handleDetailUrlHref},
-        before_fetch_response:  {source: 'httpRequests', name: `${turboPrefix}before-fetch-response`, handler: handleDetailFetchResponseResponseUrl},
-        before_prefetch:        {source: 'httpRequests', name: `${turboPrefix}before-prefetch`, handler: handleTargetHref},
-        fetch_request_error:    {source: 'httpRequests', name: `${turboPrefix}fetch-request-error`, handler: handleDetailRequestUrlHref},
-    }), turboListeners = Object.freeze({
-        before_cache:           (callback, options) => addEventListener(turboEvents.before_cache.name, callback, options),
-        before_fetch_request:   (callback, options) => addEventListener(turboEvents.before_fetch_request.name, callback, options),
-        before_fetch_response:  (callback, options) => addEventListener(turboEvents.before_fetch_response.name, callback, options),
-        before_frame_render:    (callback, options) => addEventListener(turboEvents.before_frame_render.name, callback, options),
-        before_morph_attribute: (callback, options) => addEventListener(turboEvents.before_morph_attribute.name, callback, options),
-        before_morph_element:   (callback, options) => addEventListener(turboEvents.before_morph_element.name, callback, options),
-        before_prefetch:        (callback, options) => addEventListener(turboEvents.before_prefetch.name, callback, options),
-        before_render:          (callback, options) => addEventListener(turboEvents.before_render.name, callback, options),
-        before_stream_render:   (callback, options) => addEventListener(turboEvents.before_stream_render.name, callback, options),
-        before_visit:           (callback, options) => addEventListener(turboEvents.before_visit.name, callback, options),
-        click:                  (callback, options) => addEventListener(turboEvents.click.name, callback, options),
-        fetch_request_error:    (callback, options) => addEventListener(turboEvents.fetch_request_error.name, callback, options),
-        frame_load:             (callback, options) => addEventListener(turboEvents.frame_load.name, callback, options),
-        frame_missing:          (callback, options) => addEventListener(turboEvents.frame_missing.name, callback, options),
-        frame_render:           (callback, options) => addEventListener(turboEvents.frame_render.name, callback, options),
-        load:                   (callback, options) => addEventListener(turboEvents.load.name, callback, options),
-        morph:                  (callback, options) => addEventListener(turboEvents.morph.name, callback, options),
-        morph_element:          (callback, options) => addEventListener(turboEvents.morph_element.name, callback, options),
-        render:                 (callback, options) => addEventListener(turboEvents.render.name, callback, options),
-        submit_end:             (callback, options) => addEventListener(turboEvents.submit_end.name, callback, options),
-        submit_start:           (callback, options) => addEventListener(turboEvents.submit_start.name, callback, options),
-        visit:                  (callback, options) => addEventListener(turboEvents.visit.name, callback, options),
-    }), common = Object.defineProperties({},{
+    const version = '4.0.0', internalHandlers = {};
+
+    class TurboEvent {
+        static get prefix() { return 'turbo:'; }
+
+        name;
+        shortName;
+        source;
+        handler;
+        #listeners = [];
+
+        constructor(source, shortName, handler) {
+            this.name = `${TurboEvent.prefix}${shortName}`;
+            this.shortName = shortName;
+            this.source = source;
+            this.handler = handler;
+            Object.freeze(this);
+        }
+
+        toString() { return this.name; }
+
+        /**
+         * Sets up a function that will be called whenever the specified event is delivered to the target.
+         * @param {TurboEventCallback} listener - The object that receives a notification (an object that implements the Event interface and a string with the relevant url) when an event of the specified type occurs. This must be a `function`.
+         * @param {TurboAddEventListenerOptions} [options] - Options for the event listener.
+         * @return {boolean} True if the listener was successfully added, false otherwise.
+         */
+        addListener(listener, options) {
+            if (listener === undefined || listener === null || typeof listener !== 'function') return false;
+            if (window.Turbo?.session.history.pageLoaded && !wkof.turbo.silenceWarnings)
+                console.warn(`The page has already loaded before adding the Turbo Event listener. The target event "${this.name}" may have already been dispatched.`);
+            options = getTurboListenerOptions(options);
+            return this.#addInternalListener(listener, options);
+        }
+
+        /**
+         * Removes an event listener for the specified event name.
+         *
+         * @param {TurboEventCallback} listener - The callback function to remove.
+         * @param {TurboAddEventListenerOptions} [options] - The options for the event listener.
+         * @return {boolean} Returns `true` if the listener was successfully removed, `false` otherwise.
+         */
+        removeEventListener(listener, options) {
+            if (listener == null) return false;
+            options = getTurboListenerOptions(options);
+            return this.#removeInternalListener(listener, options);
+        }
+
+        #addInternalListener(listener, options) {
+            const wrapper = this.#createListenerWrapper(listener, options);
+            const eventListenerOptions = getEventListenerOptions(options);
+            document.documentElement.addEventListener(this.name, wrapper, eventListenerOptions);
+            this.#listeners.push({wrapper, listener, options});
+            if (!(this.name in internalHandlers)) internalHandlers[this.name] = this.#listeners;
+            return true;
+        }
+
+        #createListenerWrapper(listener, options) {
+            return (event) => {
+                const url = this.handler(event);
+                if (!verifyTurboOptions(event, url, options)) return Promise.resolve();
+                if (options.once) this.#removeInternalListener(listener, options);
+                return new Promise(resolve => {
+                    if (!options.noTimeout) setTimeout(() => resolve(listener(event, url)), 0);
+                    else resolve(listener(event, url));
+                });
+            };
+        }
+
+        #removeInternalListener(listener, options) {
+            const index = this.#listeners.findIndex(({listener: existingListener, options: existingOptions}) => listener === existingListener && deepEqual(options, existingOptions));
+            if (index === -1) return false;
+            document.documentElement.removeEventListener(this.name, this.#listeners[index].wrapper, getEventListenerOptions(options));
+            this.#listeners.splice(index, 1);
+            if (this.#listeners.length === 0) delete internalHandlers[this.name];
+            return true;
+        }
+    }
+    const handleDetailFetchResponseResponseUrl = event => event.detail.fetchResponse.response.url,
+        handleDetailFormSubmissionFetchRequestUrlHref = event => event.detail.formSubmission.fetchRequest.url.href, handleDetailNewElementBaseURI = event => event.detail.newElement.baseURI,
+        handleDetailNewFrameBaseURI = event => event.detail.newFrame.baseURI, handleDetailNewStreamUrl = event => event.detail.newStream.url,
+        handleDetailRequestUrlHref = event => event.detail.request.url.href, handleDetailResponseUrl = event => event.detail.response.url, handleDetailUrl = event => event.detail.url,
+        handleDetailUrlHref = event => event.detail.url.href, handleTargetBaseURI = event => event.target.baseURI, handleTargetHref = event => event.target.href;
+    /**
+     * Container for all the Turbo events.
+     * @see https://turbo.hotwired.dev/reference/events
+     */
+    const turboEvents = Object.freeze({
+        click:                  new TurboEvent('document','click', handleDetailUrl),
+        before_visit:           new TurboEvent('document','before-visit', handleDetailUrl),
+        visit:                  new TurboEvent('document','visit', handleDetailUrl),
+        before_cache:           new TurboEvent('document','before-cache', handleTargetBaseURI),
+        before_render:          new TurboEvent('document','before-render', handleTargetBaseURI),
+        render:                 new TurboEvent('document','render', handleTargetBaseURI),
+        load:                   new TurboEvent('document','load', handleDetailUrl),
+        morph:                  new TurboEvent('pageRefresh','morph', handleDetailNewElementBaseURI),
+        before_morph_element:   new TurboEvent('pageRefresh','before-morph-element', handleTargetBaseURI),
+        before_morph_attribute: new TurboEvent('pageRefresh','before-morph-attribute', handleDetailNewElementBaseURI),
+        morph_element:          new TurboEvent('pageRefresh','morph-element', handleDetailNewElementBaseURI),
+        submit_start:           new TurboEvent('forms','submit-start', handleDetailFormSubmissionFetchRequestUrlHref),
+        submit_end:             new TurboEvent('forms','submit-end', handleDetailFetchResponseResponseUrl),
+        before_frame_render:    new TurboEvent('frames','before-frame-render', handleDetailNewFrameBaseURI),
+        frame_render:           new TurboEvent('frames','frame-render', handleTargetBaseURI),
+        frame_load:             new TurboEvent('frames','frame-load', handleTargetBaseURI),
+        frame_missing:          new TurboEvent('frames','frame-missing', handleDetailResponseUrl),
+        before_stream_render:   new TurboEvent('streams','before-stream-render', handleDetailNewStreamUrl),
+        before_fetch_request:   new TurboEvent('httpRequests','before-fetch-request', handleDetailUrlHref),
+        before_fetch_response:  new TurboEvent('httpRequests','before-fetch-response', handleDetailFetchResponseResponseUrl),
+        before_prefetch:        new TurboEvent('httpRequests','before-prefetch', handleTargetHref),
+        fetch_request_error:    new TurboEvent('httpRequests','fetch-request-error', handleDetailRequestUrlHref),
+    });
+    /** Convenience container for all the Turbo events. */
+    const turboListeners = {
+        /** @deprecated Use [wkof.turbo.events.before_cache.addListener]{@link TurboEvent#addListener} instead.*/ before_cache:           (callback, options) => turboEvents.before_cache.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.before_fetch_request.addListener]{@link TurboEvent#addListener} instead.*/ before_fetch_request:   (callback, options) => turboEvents.before_fetch_request.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.before_fetch_response.addListener]{@link TurboEvent#addListener} instead.*/ before_fetch_response:  (callback, options) => turboEvents.before_fetch_response.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.before_frame_render.addListener]{@link TurboEvent#addListener} instead.*/ before_frame_render:    (callback, options) => turboEvents.before_frame_render.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.before_morph_attribute.addListener]{@link TurboEvent#addListener} instead.*/ before_morph_attribute: (callback, options) => turboEvents.before_morph_attribute.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.before_morph_element.addListener]{@link TurboEvent#addListener} instead.*/ before_morph_element:   (callback, options) => turboEvents.before_morph_element.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.before_prefetch.addListener]{@link TurboEvent#addListener} instead.*/ before_prefetch:        (callback, options) => turboEvents.before_prefetch.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.before_render.addListener]{@link TurboEvent#addListener} instead.*/ before_render:          (callback, options) => turboEvents.before_render.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.before_stream_render.addListener]{@link TurboEvent#addListener} instead.*/ before_stream_render:   (callback, options) => turboEvents.before_stream_render.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.before_visit.addListener]{@link TurboEvent#addListener} instead.*/ before_visit:           (callback, options) => turboEvents.before_visit.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.click.addListener]{@link TurboEvent#addListener} instead.*/ click:                  (callback, options) => turboEvents.click.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.fetch_request_error.addListener]{@link TurboEvent#addListener} instead.*/ fetch_request_error:    (callback, options) => turboEvents.fetch_request_error.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.frame_load.addListener]{@link TurboEvent#addListener} instead.*/ frame_load:             (callback, options) => turboEvents.frame_load.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.frame_missing.addListener]{@link TurboEvent#addListener} instead.*/ frame_missing:          (callback, options) => turboEvents.frame_missing.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.frame_render.addListener]{@link TurboEvent#addListener} instead.*/ frame_render:           (callback, options) => turboEvents.frame_render.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.load.addListener]{@link TurboEvent#addListener} instead.*/ load:                   (callback, options) => turboEvents.load.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.morph.addListener]{@link TurboEvent#addListener} instead.*/ morph:                  (callback, options) => turboEvents.morph.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.morph_element.addListener]{@link TurboEvent#addListener} instead.*/ morph_element:          (callback, options) => turboEvents.morph_element.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.render.addListener]{@link TurboEvent#addListener} instead.*/ render:                 (callback, options) => turboEvents.render.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.submit_end.addListener]{@link TurboEvent#addListener} instead.*/ submit_end:             (callback, options) => turboEvents.submit_end.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.submit_start.addListener]{@link TurboEvent#addListener} instead.*/ submit_start:           (callback, options) => turboEvents.submit_start.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.visit.addListener]{@link TurboEvent#addListener} instead.*/ visit:                  (callback, options) => turboEvents.visit.addListener(callback, options),
+    }; Object.freeze(turboListeners);
+    /** Container for various commonly used objects. */
+    const common = {}; Object.defineProperties(common,{
+        /** Collection of location patterns for commonly used pages. */
         locations: {value: Object.defineProperties({}, {
             dashboard: {value: /^https:\/\/www\.wanikani\.com(\/dashboard.*)?\/?$/},
             items_pages: {value: /^https:\/\/www\.wanikani\.com\/(radicals|kanji|vocabulary)\/.+\/?$/},
@@ -89,21 +167,26 @@
             lessons_quiz: {value: /^https:\/\/www\.wanikani\.com\/subject-lessons\/[\d-]+\/quiz.*\/?$/},
             reviews: {value: /^https:\/\/www\.wanikani\.com\/subjects\/review.*\/?$/},
         }),
-    }}), commonListeners = Object.defineProperties({},{
-        events:         {value: (eventList, callback, options) => addMultipleEventListeners(eventList, callback, options)},
-        urls:           {value: (callback, urls, options) => addTypicalPageListener(callback, urls, options)},
-        targetIds:      {value: (callback, targetIds, options) => addTypicalFrameListener(callback, targetIds, options)},
-        dashboard:      {value: (callback, options) => addTypicalPageListener(callback, common.locations.dashboard, options)},
-        items_pages:    {value: (callback, options) => addTypicalPageListener(callback, common.locations.items_pages, options)},
-        lessons:        {value: (callback, options) => addTypicalPageListener(callback, common.locations.lessons, options)},
-        lessons_picker: {value: (callback, options) => addTypicalPageListener(callback, common.locations.lessons_picker, options)},
-        lessons_quiz:   {value: (callback, options) => addTypicalPageListener(callback, common.locations.lessons_quiz, options)},
-        reviews:        {value: (callback, options) => addTypicalPageListener(callback, common.locations.reviews, options)},
-    }), eventMap = Object.defineProperties({}, {
+    }});
+    const commonListeners = {}; Object.defineProperties(commonListeners, {
+        /** @see addMultipleEventListeners */ eventList: {value: (eventList, callback, options) => addMultipleEventListeners(eventList, callback, options)},
+        /** @deprecated Use {@link eventList} instead.*/ events: {value: (eventList, callback, options) => commonListeners.eventList(eventList, callback, options)},
+        /** @see addTypicalFrameListener */ targetIds: {value: (callback, targetIds, options) => addTypicalFrameListener(callback, targetIds, options)},
+        /** @see addTypicalPageListener */ urls: {value: (callback, urls, options) => addTypicalPageListener(callback, urls, options)},
+        /** @see addTypicalPageListener */ dashboard: {value: (callback, options) => addTypicalPageListener(callback, common.locations.dashboard, options)},
+        /** @see addTypicalPageListener */ items_pages: {value: (callback, options) => addTypicalPageListener(callback, common.locations.items_pages, options)},
+        /** @see addTypicalPageListener */ lessons: {value: (callback, options) => addTypicalPageListener(callback, common.locations.lessons, options)},
+        /** @see addTypicalPageListener */ lessons_picker: {value: (callback, options) => addTypicalPageListener(callback, common.locations.lessons_picker, options)},
+        /** @see addTypicalPageListener */ lessons_quiz: {value: (callback, options) => addTypicalPageListener(callback, common.locations.lessons_quiz, options)},
+        /** @see addTypicalPageListener */ reviews: {value: (callback, options) => addTypicalPageListener(callback, common.locations.reviews, options)},
+    });
+    /** Container for various event listeners.
+     */
+    const eventMap = {}; Object.defineProperties(eventMap, {
         common: {value: commonListeners},
         event: {value: turboListeners},
     });
-    const publishedInterface = Object.defineProperties({},{
+    const publishedInterface = {}; Object.defineProperties(publishedInterface, {
         add_event_listener: {value: addEventListener},
         remove_event_listener: {value: removeEventListener},
         on: {value: eventMap},
@@ -112,9 +195,10 @@
 
         silenceWarnings: {value: false, writable: true},
         version: {value: version},
-        '_.internal': {value: {internalHandlers, eventHandlers}},
+        '_.internal': {value: {internalHandlers}},
     });
-    let lastUrlLoaded = window.Turbo?.session.history.pageLoaded ? window.Turbo.session.location.href : '!';
+
+    let lastUrlLoaded = window.Turbo?.session.history.pageIsLoaded() ? window.Turbo.session.history.location.href : '!';
 
     /* === JSDoc Definitions === */
 
@@ -157,56 +241,40 @@
 
         if (eventName === 'load') {
             const quasiLoadEvent = new CustomEvent('load', {bubbles: false, cancelable: false, composed: false, target: document.documentElement});
-            if (lastUrlLoaded === '!' || !verifyOptions(quasiLoadEvent, lastUrlLoaded, getListenerOptions(Object.assign({useDocumentIds: true}, options)))) return false;
+            if (lastUrlLoaded === '!' || !verifyTurboOptions(quasiLoadEvent, lastUrlLoaded, getTurboListenerOptions(Object.assign({useDocumentIds: true}, options)))) return false;
             listener(quasiLoadEvent, lastUrlLoaded);
             return true;
         }
-        if (window.Turbo?.session.history.pageLoaded && !wkof.turbo.silenceWarnings)
-            console.warn(`The page has already loaded before adding the Turbo Event listener. The target event "${eventName}" may have already been dispatched.`);
-        options = getListenerOptions(options);
-        const eventKey = eventName.slice(turboPrefix.length).replaceAll('-', '_');
+        const eventKey = eventName.slice(TurboEvent.prefix.length).replaceAll('-', '_');
         if (!(eventKey in turboEvents)) return false;
-        const {capture, passive, signal} = options;
-        addInternalEventListener(eventName, turboEvents[eventKey].handler, {capture, passive, signal});
-        if (!(eventName in eventHandlers)) eventHandlers[eventName] = [];
-        eventHandlers[eventName].push({listener, options});
-        return true;
-    }
-
-    function addInternalEventListener(eventName, handler, options) {
-        if (typeof eventName !== 'string') return false;
-        const key = options.capture ? 'capture' : 'bubble';
-        if (!(eventName in internalHandlers)) internalHandlers[eventName] = {};
-        else if (internalHandlers[eventName][key]) return false;
-        options = {capture: options.capture, once: false, passive: false, signal: undefined}; // TODO: Determine if `once`|`signal` can be passed here without causing issues.
-        internalHandlers[eventName][key] = {handler, options};
-        document.documentElement.addEventListener(eventName, handler, options);
-        return true;
+        return turboEvents[eventKey].addListener(listener, options);
     }
 
     /**
      * Adds multiple event listeners to the specified event list.
      *
-     * @param {(string|object|Array<string|object>)} eventList - The event list to add listeners to. If it is an object, it is assumed to be the `turboEvents` object. If it is an array, each element is treated as a string containing the event name or an object containing the event name as the property `name`.
+     * @param {(string|object|Array<string|object>|Set<string|object>)} eventList - The event list to add listeners to. If it is an object, it is assumed to be the `turboEvents` object. If it is an array, each element is treated as a string containing the event name or an object containing the event name as the property `name`.
      * @param {TurboEventCallback} listener - The callback function to be invoked when the event is triggered.
      * @param {TurboAddEventListenerOptions} [options] - The options for the event listener.
-     * @return {(object|object[])} An array of objects containing the added event names and whether the listener was successfully added.
+     * @return {(object|object[])} An array of objects `{name: string, added: boolean}` containing the added event names and whether the listener was successfully added.
      */
     function addMultipleEventListeners(eventList, listener, options) {
         if (eventList === turboEvents) eventList = Object.values(eventList);
-        if (Array.isArray(eventList)) {
-            return eventList.map(eventName => {
-                const name = getValidEventName(eventName), added = addEventListener(name, listener, options);
-                return {name, added};
-            });
-        } else {
-            const name = getValidEventName(eventList), added = addEventListener(name, listener, options);
+        if (eventList instanceof Set) return Array.from(eventList.values().map(eventName => {
+            const name = getValidEventName(eventName), added = addEventListener(name, listener, options);
             return {name, added};
-        }
+        }));
+        if (Array.isArray(eventList)) return eventList.map(eventName => {
+            const name = getValidEventName(eventName), added = addEventListener(name, listener, options);
+            return {name, added};
+        });
+        const name = getValidEventName(eventList), added = addEventListener(name, listener, options);
+        return {name, added};
     }
 
     /**
-     * Adds a turbo:load listener that will be called on the provided URLs. This is a convenience function to simplify merging the options.
+     * Adds a turbo:load listener that will be called on the provided URLs and a "load" listener to guarantee the callback triggers even when the events have already fired.
+     * This is a convenience function to simplify merging the options.
      *
      * @param {TurboEventCallback} callback - The callback function to be invoked when the event is triggered.
      * @param {(string|RegExp|Array<string|RegExp>)} urls - The URLs to be verified against the URL parameter.
@@ -217,7 +285,7 @@
         const warningSetting = wkof.turbo.silenceWarnings;
         try {
             wkof.turbo.silenceWarnings = true;
-            return commonListeners.events(['load', turboEvents.load.name], callback, Object.assign(options ?? {}, {urls}));
+            return commonListeners.eventList(['load', turboEvents.load.name], callback, Object.assign(options ?? {}, {urls}))[1].added;
         } finally {
             wkof.turbo.silenceWarnings = warningSetting;
         }
@@ -232,7 +300,7 @@
      * @return {boolean} True if the listener was successfully added, false otherwise.
      */
     function addTypicalFrameListener(callback, targetIds, options) {
-        return turboListeners.frame_load(callback, Object.assign(options ?? {}, {targetIds}));
+        return turboEvents.frame_load.addListener(callback, Object.assign(options ?? {}, {targetIds}));
     }
 
     /**
@@ -246,9 +314,9 @@
     function removeEventListener(eventName, listener, options) {
         if (listener == null) return false;
         if (typeof eventName === 'object' && 'name' in eventName) eventName = eventName.name;
-        if (typeof eventName !== 'string' || !(eventName in eventHandlers)) return false;
-        const handlers = eventHandlers[eventName];
-        options = getListenerOptions(options);
+        if (typeof eventName !== 'string' || !(eventName in internalHandlers)) return false;
+        const handlers = internalHandlers[eventName];
+        options = getTurboListenerOptions(options);
         const handler = handlers.find(({listener: existingListener, options: existingOptions}) => listener === existingListener && deepEqual(options, existingOptions));
         if (!handler) return false;
         handlers.splice(handlers.indexOf(handler), 1);
@@ -281,20 +349,6 @@
             ok(x).every(key => deepEqual(x[key], y[key]))
         ) : (x === y);
     }
-
-    /**
-     * Freezes an object and all its nested properties.
-     *
-     * @template T
-     * @param {T} o - The object to freeze.
-     * @return {Readonly<T>} - The frozen object.
-     */
-    function deepFreeze(o) {
-        if (o != null && (typeof o === 'object' || typeof o === 'function'))
-            Object.values(o).filter(v => !Object.isFrozen(v)).forEach(deepFreeze);
-        return Object.freeze(o);
-    }
-
     function didConfirmWarning() {
         const message = `It looks like a script is using an incompatible version of the WaniKani Open Framework Turbo Events library.
 Setup will continue anyway, but some unexpected behavior may occur.
@@ -302,24 +356,6 @@ Setup will continue anyway, but some unexpected behavior may occur.
 Press "OK" to hide this message for 7 days.
 Press "Cancel" to be reminded again next time.`;
         return confirm(message);
-    }
-
-    /**
-     * Generates a promise that resolves either immediately—when the options dictate that the event does not match—or when the given event listener is called with the provided event and URL.
-     *
-     * @param {CustomEvent} event - The Turbo event object.
-     * @param {string} url - The URL associated with the event.
-     * @param {TurboEventCallback} listener - The callback to invoke when the event occurs.
-     * @param {TurboAddEventListenerOptions} [options] - Additional options for the event listener.
-     * @return {Promise<void|*>} A promise that resolves either immediately or when the event listener is executed.
-     */
-    function emitListener(event, url, listener, options) {
-        if (!verifyOptions(event, url, options)) return Promise.resolve();
-        if (options.once) removeEventListener(event.type, listener, options);
-        return new Promise(resolve => {
-            if (!options.noTimeout) setTimeout(()=> resolve(listener(event,url)), 0);
-            else resolve(listener(event, url));
-        });
     }
 
     /**
@@ -334,17 +370,14 @@ Press "Cancel" to be reminded again next time.`;
     }
 
     /**
-     * Generates an iterator that yields promises for each event listener associated with the given event.
+     * Extracts the event listener options from the input object.
      *
-     * @param {CustomEvent} event - The Turbo event object.
-     * @param {string} url - The URL associated with the event.
-     * @yields {Promise<void|*>} A promise that resolves either immediately or when the event listener is executed.
+     * @param {TurboAddEventListenerOptions} [options] - Input object containing some or all of the following properties:
+     * @return {AddEventListenerOptions} An `options` object for `addEventListener()` or `removeEventListener()`.
      */
-    function * getEventListeners(event, url) {
-        if (event === undefined || event === null || !(event.type in eventHandlers)) return;
-        for (const {listener, options} of eventHandlers[event.type]) {
-            yield emitListener(event, url, listener, options);
-        }
+    function getEventListenerOptions(options) {
+        const {passive, capture, once, signal} = options;
+        return {capture, once, passive, signal};
     }
 
     /**
@@ -360,9 +393,9 @@ Press "Cancel" to be reminded again next time.`;
      * @param {AbortSignal} [input.signal] - The listener will be removed when the given `AbortSignal` object's `abort()` method is called. If not specified, defaults to `undefined`
      * @param {(string|string[]|Set<string>)} [input.targetIds] - The target IDs to be verified against the event target ID. If not specified, defaults to `undefined`
      * @param {(string|RegExp|Array<string|RegExp>)} [input.urls] - The URLs to be verified against the URL parameter. If not specified, defaults to `undefined`
-     * @return {TurboAddEventListenerOptions} An `options` object for event listeners.
+     * @return {TurboAddEventListenerOptions} An `options` object for Turbo event listeners.
      */
-    function getListenerOptions(input) {
+    function getTurboListenerOptions(input) {
         return {
             capture: typeof input?.capture === 'boolean' ? input.capture : false,
             useDocumentIds: typeof input?.useDocumentIds === 'boolean' ? input.useDocumentIds : false,
@@ -391,17 +424,6 @@ Press "Cancel" to be reminded again next time.`;
     }
 
     /**
-     * Asynchronously handles an event by executing all registered event listeners for the given event and URL.
-     *
-     * @param {CustomEvent} event - The Turbo event object.
-     * @param {string} url - The URL associated with the event.
-     * @return {Promise<void>} A promise that resolves when all event listeners have been executed.
-     */
-    async function handleTurboEvent(event, url) {
-        await Promise.all(getEventListeners(event, url));
-    }
-
-    /**
      * Normalizes the input `strings` into a Set of strings.
      *
      * @param {(*|*[]|Set<*>)} strings - The input strings to be normalized.
@@ -426,7 +448,7 @@ Press "Cancel" to be reminded again next time.`;
      * @return {RegExp[]} An array of RegExp objects containing input values coerced into RegExp objects.
      */
     function normalizeToRegExpArray(input) {
-        if (input === undefined || input === null) return emptyArray;
+        if (input === undefined || input === null) return [];
         if (Array.isArray(input) && input.every(val => val instanceof RegExp)) return input;
         const output = [];
         if (!Array.isArray(input)) input = [input];
@@ -451,7 +473,7 @@ Press "Cancel" to be reminded again next time.`;
      * @param {TurboAddEventListenerOptions} options - The options to use for verification.
      * @return {boolean} Returns true if the options are valid, false otherwise.
      */
-    function verifyOptions(event, url, options) {
+    function verifyTurboOptions(event, url, options) {
         if (options === undefined || options === null) return true;
         // Ignore cached pages. See https://discuss.hotwired.dev/t/before-cache-render-event/4928/4
         const {urls, nocache, targetIds: ids} = options;
@@ -478,14 +500,13 @@ Press "Cancel" to be reminded again next time.`;
         if (listenersToActivate === null) return Promise.resolve();
         wkof.turbo = publishedInterface;
         Object.defineProperty(wkof, "turbo", {writable: false});
-        // Keep this one out of the internal event handler list because it does not propagate events to the handlers
-        document.documentElement.addEventListener(turboEvents.load.name, handleUpdateLoadedPage, {capture: false, passive: true, once: false});
+        turboEvents.load.addListener(event => lastUrlLoaded = event.detail.url, {capture: true, passive: true, once: false});
 
         if (listenersToActivate !== undefined) {
-            for (const {name, options} in listenersToActivate) {
-                const eventKey = name.slice(turboPrefix.length).replaceAll('-', '_');
-                const {handler} = turboEvents[eventKey];
-                addInternalEventListener(name, handler, options);
+            for (const {name, listener, options} in listenersToActivate) {
+                const eventKey = name.slice(TurboEvent.prefix.length).replaceAll('-', '_');
+                const event = turboEvents[eventKey];
+                event.addListener(listener, options);
             }
         }
         return Promise.resolve();
@@ -509,19 +530,18 @@ Press "Cancel" to be reminded again next time.`;
                 setCookie(cookieKey, 'Y', {days: 7});
         } else {
             setModuleReadyState(false);
-            Object.assign(eventHandlers, internal.eventHandlers);
             for (const [eventName, object] of Object.entries(internal.internalHandlers)) {
                 if (!object) continue;
                 if ('capture' in object || 'bubble' in object) {
                     for (const [, {handler, options}] of object) {
                         document.documentElement.removeEventListener(eventName, handler, options);
-                        existingActiveListeners.set(eventName, options);
+                        existingActiveListeners.set(eventName, {listener: handler, options});
                     }
                 } else if ('active' in object) {
                     const {handler, active} = object;
                     if (active) {
                         document.documentElement.removeEventListener(eventName, handler.listener ?? handler, handler.listenerOptions);
-                        existingActiveListeners.set(eventName, handler.listenerOptions);
+                        existingActiveListeners.set(eventName, {listener: handler.listener, options: handler.listenerOptions});
                     }
                 }
             }
