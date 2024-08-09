@@ -2,7 +2,7 @@
 // @name        Wanikani Open Framework Turbo Events
 // @namespace   https://greasyfork.org/en/users/11878
 // @description Adds helpful methods for dealing with Turbo Events to WaniKani Open Framework
-// @version     3.0.4
+// @version     3.0.5
 // @match       https://www.wanikani.com/*
 // @match       https://preview.wanikani.com/*
 // @author      Inserio
@@ -10,6 +10,8 @@
 // @license     MIT; http://opensource.org/licenses/MIT
 // @run-at      document-start
 // @grant       none
+// @supportURL  https://community.wanikani.com/t/x/66725
+// @homepageURL https://github.com/bashenk/WaniKaniOpenFrameworkTurboEvents
 // ==/UserScript==
 /* global wkof */
 /* jshint esversion: 11 */
@@ -18,7 +20,7 @@
 (function() {
     'use strict';
 
-    const version = '3.0.4', turboPrefix = 'turbo:', eventHandlers = {}, internalHandlers = {}, emptyArray = Object.freeze([]),
+    const version = '3.0.5', turboPrefix = 'turbo:', eventHandlers = {}, internalHandlers = {}, emptyArray = Object.freeze([]),
         handleDetailFetchResponseResponseUrl = async event => await handleTurboEvent(event, event.detail.fetchResponse.response.url),
         handleDetailFormSubmissionFetchRequestUrlHref = async event => await handleTurboEvent(event, event.detail.formSubmission.fetchRequest.url.href),
         handleDetailNewElementBaseURI = async event => await handleTurboEvent(event, event.detail.newElement.baseURI),
@@ -101,16 +103,18 @@
         common: {value: commonListeners},
         event: {value: turboListeners},
     });
-    const publishedInterface = Object.freeze({
-        add_event_listener: addEventListener,
-        remove_event_listener: removeEventListener,
-        on: eventMap,
-        events: turboEvents,
-        common: common,
-        version,
-        '_.internal': {internalHandlers, eventHandlers}
+    const publishedInterface = Object.defineProperties({},{
+        add_event_listener: {value: addEventListener},
+        remove_event_listener: {value: removeEventListener},
+        on: {value: eventMap},
+        events: {value: turboEvents},
+        common: {value: common},
+
+        silenceWarnings: {value: false, writable: true},
+        version: {value: version},
+        '_.internal': {value: {internalHandlers, eventHandlers}},
     });
-    let lastUrlLoaded = '!';
+    let lastUrlLoaded = window.Turbo?.session.history.pageLoaded ? window.Turbo.session.location.href : '!';
 
     /* === JSDoc Definitions === */
 
@@ -126,8 +130,8 @@
      * @typedef TurboAddEventListenerOptions
      * @extends AddEventListenerOptions
      * @prop {boolean} [noTimeout] - Indicates whether to skip use of setTimeout(callback,0), typically used to let the event settle before invoking the callback. If not specified, defaults to `false`.
-     * @prop {(string|RegExp|Array<string|RegExp>)} [urls] - The URLs to be verified against the URL parameter. If not specified, defaults to an empty `Array`.
-     * @prop {(string|string[]|Set<string>)} [targetIds] - The target IDs to be verified against the event target ID. If not specified, defaults to an empty `Set`.
+     * @prop {(string|RegExp|Array<string|RegExp>)} [urls] - The URLs to be verified against the URL parameter. If not specified, the listener runs on any URL.
+     * @prop {(string|string[]|Set<string>)} [targetIds] - The target IDs to be verified against the event target ID. If not specified, no targetIds are associated with the listener.
      * @prop {boolean} [useDocumentIds] - Indicates whether to check the IDs of the document element in addition to the event target for the `targetIds`. If not specified, defaults to `false`.
      * @prop {boolean} [nocache] - Indicates whether to ignore events involving Turbo's cached pages. See {@link https://discuss.hotwired.dev/t/before-cache-render-event/4928/4}. If not specified, defaults to `false`.
      * @prop {boolean} [once] - Indicates that the listener should be invoked at most once after being added. If `true`, the listener would be automatically removed when invoked. If not specified, defaults to `false`.
@@ -152,10 +156,13 @@
         if (eventName === undefined) return false;
 
         if (eventName === 'load') {
-            if (lastUrlLoaded === '!' || !verifyOptions(eventName, lastUrlLoaded, Object.assign({useDocumentIds: true}, options))) return false;
-            listener(eventName, lastUrlLoaded);
+            const quasiLoadEvent = new CustomEvent('load', {bubbles: false, cancelable: false, composed: false, target: document.documentElement});
+            if (lastUrlLoaded === '!' || !verifyOptions(quasiLoadEvent, lastUrlLoaded, getListenerOptions(Object.assign({useDocumentIds: true}, options)))) return false;
+            listener(quasiLoadEvent, lastUrlLoaded);
             return true;
         }
+        if (window.Turbo?.session.history.pageLoaded && !wkof.silenceWarnings)
+            console.warn(`The page has already loaded before adding the Turbo Event listener. The target event "${eventName}" may have already been dispatched.`);
         options = getListenerOptions(options);
         const eventKey = eventName.slice(turboPrefix.length).replaceAll('-', '_');
         if (!(eventKey in turboEvents)) return false;
@@ -203,11 +210,17 @@
      *
      * @param {TurboEventCallback} callback - The callback function to be invoked when the event is triggered.
      * @param {(string|RegExp|Array<string|RegExp>)} urls - The URLs to be verified against the URL parameter.
-     * @param {TurboAddEventListenerOptions} [options={}] - The options for the event listener.
+     * @param {TurboAddEventListenerOptions} [options] - The options for the event listener.
      * @return {boolean} True if the listener was successfully added, false otherwise.
      */
-    function addTypicalPageListener(callback, urls, options={}) {
-        return commonListeners.events(turboEvents.load.name, callback, Object.assign(options, {urls}));
+    function addTypicalPageListener(callback, urls, options) {
+        const warningSetting = wkof.turbo.silenceWarnings;
+        try {
+            wkof.turbo.silenceWarnings = true;
+            return commonListeners.events(['load', turboEvents.load.name], callback, Object.assign(options ?? {}, {urls}));
+        } finally {
+            wkof.turbo.silenceWarnings = warningSetting;
+        }
     }
 
     /**
@@ -215,11 +228,11 @@
      *
      * @param {TurboEventCallback} callback - The callback function to be invoked when the frame event is triggered.
      * @param {(string|string[]|Set<string>)} [targetIds] - The target IDs to be verified against the event target ID.
-     * @param {TurboAddEventListenerOptions} [options={}] - The options for the event listener.
+     * @param {TurboAddEventListenerOptions} [options] - The options for the event listener.
      * @return {boolean} True if the listener was successfully added, false otherwise.
      */
-    function addTypicalFrameListener(callback, targetIds, options={}) {
-        return turboListeners.frame_load(callback, Object.assign(options, {targetIds}));
+    function addTypicalFrameListener(callback, targetIds, options) {
+        return turboListeners.frame_load(callback, Object.assign(options ?? {}, {targetIds}));
     }
 
     /**
@@ -344,26 +357,23 @@ Press "Cancel" to be reminded again next time.`;
      * @param {boolean} [input.nocache=false] - Indicates whether to ignore events for Turbo's cached version of pages.
      * @param {boolean} [input.once=false] - Indicates that the listener should be invoked at most once after being added.
      * @param {boolean} [input.passive=false] - If `true`, indicates that the function specified by listener will never call `preventDefault()`.
-     * @param {AbortSignal} [input.signal] - The listener will be removed when the given `AbortSignal` object's `abort()` method is called. If not specified, no `AbortSignal` is associated with the listener.
-     * @param {(string|string[]|Set<string>)} [input.targetIds] - The target IDs to be verified against the event target ID. If not specified, defaults to an empty `Set`.
-     * @param {(string|RegExp|Array<string|RegExp>)} [input.urls] - The URLs to be verified against the URL parameter. If not specified, defaults to an empty array.
+     * @param {AbortSignal} [input.signal] - The listener will be removed when the given `AbortSignal` object's `abort()` method is called. If not specified, defaults to `undefined`
+     * @param {(string|string[]|Set<string>)} [input.targetIds] - The target IDs to be verified against the event target ID. If not specified, defaults to `undefined`
+     * @param {(string|RegExp|Array<string|RegExp>)} [input.urls] - The URLs to be verified against the URL parameter. If not specified, defaults to `undefined`
      * @return {TurboAddEventListenerOptions} An `options` object for event listeners.
      */
     function getListenerOptions(input) {
-        const output = Object.assign({
-                capture: false,
-                useDocumentIds: false,
-                noTimeout: false,
-                nocache: false,
-                once: false,
-                passive: false,
-                signal: undefined,
-                targetIds: undefined,
-                urls: undefined,
-            }, input);
-        output.urls = normalizeToRegExpArray(output.urls);
-        output.targetIds = normalizeToStringSet(output.targetIds);
-        return output;
+        return {
+            capture: typeof input?.capture === 'boolean' ? input.capture : false,
+            useDocumentIds: typeof input?.useDocumentIds === 'boolean' ? input.useDocumentIds : false,
+            noTimeout: typeof input?.noTimeout === 'boolean' ? input.noTimeout : false,
+            nocache: typeof input?.nocache === 'boolean' ? input.nocache : false,
+            once: typeof input?.once === 'boolean' ? input.once : false,
+            passive: typeof input?.passive === 'boolean' ? input.passive : false,
+            signal: input?.signal instanceof AbortSignal ? input.signal : undefined,
+            targetIds: input?.targetIds != null ? normalizeToStringSet(input.targetIds) : undefined,
+            urls: input?.urls != null ? normalizeToRegExpArray(input.urls) : undefined,
+        };
     }
 
     /**
@@ -442,11 +452,12 @@ Press "Cancel" to be reminded again next time.`;
      * @return {boolean} Returns true if the options are valid, false otherwise.
      */
     function verifyOptions(event, url, options) {
+        if (options === undefined || options === null) return true;
         // Ignore cached pages. See https://discuss.hotwired.dev/t/before-cache-render-event/4928/4
         const {urls, nocache, targetIds: ids} = options;
         if (nocache && event?.target?.hasAttribute('data-turbo-preview')) return false;
-        if (urls.length > 0 && !urls.some(reg => reg.test(url) && !(reg.lastIndex = 0))) return false;
-        return ids.size === 0 || ((event?.target?.id != null && ids.has(event.target.id)) || (options.useDocumentIds && ids.values().some(id => document.getElementById(id))));
+        if (urls?.length > 0 && !urls.some(reg => reg.test(url) && !(reg.lastIndex = 0))) return false;
+        return ids == null || ids.size === 0 || ((event?.target?.id != null && ids.has(event.target.id)) || (options.useDocumentIds && ids.values().some(id => document.getElementById(id))));
     }
 
     function isNewerThan(otherVersion) {
@@ -458,7 +469,7 @@ Press "Cancel" to be reminded again next time.`;
     /* === Initialization === */
 
     /**
-     * Adds Turbo Events to the wkof object, updating the version and adding internal event listeners.
+     * Adds Turbo Events to the wkof object, updating the version and adding any existing internal event listeners from an older version.
      *
      * @return {Promise<void>} A promise that resolves when the operation is complete.
      */
