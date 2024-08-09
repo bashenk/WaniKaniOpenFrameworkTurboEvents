@@ -22,6 +22,7 @@
 
     const version = '4.0.0', internalHandlers = {};
 
+    /** @class TurboEvent */
     class TurboEvent {
         static get prefix() { return 'turbo:'; }
 
