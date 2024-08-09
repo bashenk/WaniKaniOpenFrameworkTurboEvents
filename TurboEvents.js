@@ -161,7 +161,7 @@
             listener(quasiLoadEvent, lastUrlLoaded);
             return true;
         }
-        if (window.Turbo?.session.history.pageLoaded && !wkof.silenceWarnings)
+        if (window.Turbo?.session.history.pageLoaded && !wkof.turbo.silenceWarnings)
             console.warn(`The page has already loaded before adding the Turbo Event listener. The target event "${eventName}" may have already been dispatched.`);
         options = getListenerOptions(options);
         const eventKey = eventName.slice(turboPrefix.length).replaceAll('-', '_');
