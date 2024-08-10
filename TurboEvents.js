@@ -449,14 +449,15 @@ Press "Cancel" to be reminded again next time.`;
     /**
      * Normalizes the input object `input` into an array of RegExp objects.
      *
-     * @param {(*|*[])} input - The input to be normalized.
+     * @param {(*|*[]|Set<*>)} input - The input to be normalized.
      * @return {RegExp[]} An array of RegExp objects containing input values coerced into RegExp objects.
      */
     function normalizeToRegExpArray(input) {
         if (input === undefined || input === null) return [];
-        if (Array.isArray(input) && input.every(val => val instanceof RegExp)) return input;
-        const output = [];
+        if (input instanceof Set) input = [...input.values()];
         if (!Array.isArray(input)) input = [input];
+        if (input.every(val => val instanceof RegExp)) return input;
+        const output = [];
         for (const url of input) {
             if (url instanceof RegExp) output.push(url);
             else if (typeof url === 'string') output.push(new RegExp(url.replaceAll(/[.+?^${}()|[\]\\]/g, '\\$&').replaceAll('*', '.*')));
