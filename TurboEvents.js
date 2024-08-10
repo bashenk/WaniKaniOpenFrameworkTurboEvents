@@ -81,8 +81,13 @@
         #createListenerWrapper(listener, options) {
             return (event) => {
                 const url = this.handler(event);
-                if (!verifyTurboOptions(event, url, options)) return Promise.resolve();
-                if (options.once) this.#removeInternalListener(listener, options);
+                if (options.once) {
+                    if (!verifyTurboOptions(event, url, options)) {
+                        this.#addInternalListener(listener, options);
+                        return Promise.resolve();
+                    }
+                    this.#removeInternalListener(listener, options);
+                }
                 return new Promise(resolve => {
                     if (!options.noTimeout) setTimeout(() => resolve(listener(event, url)), 0);
                     else resolve(listener(event, url));
@@ -134,28 +139,28 @@
     });
     /** Convenience container for all the Turbo events. */
     const turboListeners = {
-        /** @deprecated Use [wkof.turbo.events.before_cache.addListener]{@link TurboEvent#addListener} instead.*/ before_cache:           (callback, options) => turboEvents.before_cache.addListener(callback, options),
-        /** @deprecated Use [wkof.turbo.events.before_fetch_request.addListener]{@link TurboEvent#addListener} instead.*/ before_fetch_request:   (callback, options) => turboEvents.before_fetch_request.addListener(callback, options),
-        /** @deprecated Use [wkof.turbo.events.before_fetch_response.addListener]{@link TurboEvent#addListener} instead.*/ before_fetch_response:  (callback, options) => turboEvents.before_fetch_response.addListener(callback, options),
-        /** @deprecated Use [wkof.turbo.events.before_frame_render.addListener]{@link TurboEvent#addListener} instead.*/ before_frame_render:    (callback, options) => turboEvents.before_frame_render.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.before_cache.addListener]{@link TurboEvent#addListener} instead.*/ before_cache: (callback, options) => turboEvents.before_cache.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.before_fetch_request.addListener]{@link TurboEvent#addListener} instead.*/ before_fetch_request: (callback, options) => turboEvents.before_fetch_request.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.before_fetch_response.addListener]{@link TurboEvent#addListener} instead.*/ before_fetch_response: (callback, options) => turboEvents.before_fetch_response.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.before_frame_render.addListener]{@link TurboEvent#addListener} instead.*/ before_frame_render: (callback, options) => turboEvents.before_frame_render.addListener(callback, options),
         /** @deprecated Use [wkof.turbo.events.before_morph_attribute.addListener]{@link TurboEvent#addListener} instead.*/ before_morph_attribute: (callback, options) => turboEvents.before_morph_attribute.addListener(callback, options),
-        /** @deprecated Use [wkof.turbo.events.before_morph_element.addListener]{@link TurboEvent#addListener} instead.*/ before_morph_element:   (callback, options) => turboEvents.before_morph_element.addListener(callback, options),
-        /** @deprecated Use [wkof.turbo.events.before_prefetch.addListener]{@link TurboEvent#addListener} instead.*/ before_prefetch:        (callback, options) => turboEvents.before_prefetch.addListener(callback, options),
-        /** @deprecated Use [wkof.turbo.events.before_render.addListener]{@link TurboEvent#addListener} instead.*/ before_render:          (callback, options) => turboEvents.before_render.addListener(callback, options),
-        /** @deprecated Use [wkof.turbo.events.before_stream_render.addListener]{@link TurboEvent#addListener} instead.*/ before_stream_render:   (callback, options) => turboEvents.before_stream_render.addListener(callback, options),
-        /** @deprecated Use [wkof.turbo.events.before_visit.addListener]{@link TurboEvent#addListener} instead.*/ before_visit:           (callback, options) => turboEvents.before_visit.addListener(callback, options),
-        /** @deprecated Use [wkof.turbo.events.click.addListener]{@link TurboEvent#addListener} instead.*/ click:                  (callback, options) => turboEvents.click.addListener(callback, options),
-        /** @deprecated Use [wkof.turbo.events.fetch_request_error.addListener]{@link TurboEvent#addListener} instead.*/ fetch_request_error:    (callback, options) => turboEvents.fetch_request_error.addListener(callback, options),
-        /** @deprecated Use [wkof.turbo.events.frame_load.addListener]{@link TurboEvent#addListener} instead.*/ frame_load:             (callback, options) => turboEvents.frame_load.addListener(callback, options),
-        /** @deprecated Use [wkof.turbo.events.frame_missing.addListener]{@link TurboEvent#addListener} instead.*/ frame_missing:          (callback, options) => turboEvents.frame_missing.addListener(callback, options),
-        /** @deprecated Use [wkof.turbo.events.frame_render.addListener]{@link TurboEvent#addListener} instead.*/ frame_render:           (callback, options) => turboEvents.frame_render.addListener(callback, options),
-        /** @deprecated Use [wkof.turbo.events.load.addListener]{@link TurboEvent#addListener} instead.*/ load:                   (callback, options) => turboEvents.load.addListener(callback, options),
-        /** @deprecated Use [wkof.turbo.events.morph.addListener]{@link TurboEvent#addListener} instead.*/ morph:                  (callback, options) => turboEvents.morph.addListener(callback, options),
-        /** @deprecated Use [wkof.turbo.events.morph_element.addListener]{@link TurboEvent#addListener} instead.*/ morph_element:          (callback, options) => turboEvents.morph_element.addListener(callback, options),
-        /** @deprecated Use [wkof.turbo.events.render.addListener]{@link TurboEvent#addListener} instead.*/ render:                 (callback, options) => turboEvents.render.addListener(callback, options),
-        /** @deprecated Use [wkof.turbo.events.submit_end.addListener]{@link TurboEvent#addListener} instead.*/ submit_end:             (callback, options) => turboEvents.submit_end.addListener(callback, options),
-        /** @deprecated Use [wkof.turbo.events.submit_start.addListener]{@link TurboEvent#addListener} instead.*/ submit_start:           (callback, options) => turboEvents.submit_start.addListener(callback, options),
-        /** @deprecated Use [wkof.turbo.events.visit.addListener]{@link TurboEvent#addListener} instead.*/ visit:                  (callback, options) => turboEvents.visit.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.before_morph_element.addListener]{@link TurboEvent#addListener} instead.*/ before_morph_element: (callback, options) => turboEvents.before_morph_element.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.before_prefetch.addListener]{@link TurboEvent#addListener} instead.*/ before_prefetch: (callback, options) => turboEvents.before_prefetch.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.before_render.addListener]{@link TurboEvent#addListener} instead.*/ before_render: (callback, options) => turboEvents.before_render.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.before_stream_render.addListener]{@link TurboEvent#addListener} instead.*/ before_stream_render: (callback, options) => turboEvents.before_stream_render.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.before_visit.addListener]{@link TurboEvent#addListener} instead.*/ before_visit: (callback, options) => turboEvents.before_visit.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.click.addListener]{@link TurboEvent#addListener} instead.*/ click: (callback, options) => turboEvents.click.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.fetch_request_error.addListener]{@link TurboEvent#addListener} instead.*/ fetch_request_error: (callback, options) => turboEvents.fetch_request_error.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.frame_load.addListener]{@link TurboEvent#addListener} instead.*/ frame_load: (callback, options) => turboEvents.frame_load.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.frame_missing.addListener]{@link TurboEvent#addListener} instead.*/ frame_missing: (callback, options) => turboEvents.frame_missing.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.frame_render.addListener]{@link TurboEvent#addListener} instead.*/ frame_render: (callback, options) => turboEvents.frame_render.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.load.addListener]{@link TurboEvent#addListener} instead.*/ load: (callback, options) => turboEvents.load.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.morph.addListener]{@link TurboEvent#addListener} instead.*/ morph: (callback, options) => turboEvents.morph.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.morph_element.addListener]{@link TurboEvent#addListener} instead.*/ morph_element: (callback, options) => turboEvents.morph_element.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.render.addListener]{@link TurboEvent#addListener} instead.*/ render: (callback, options) => turboEvents.render.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.submit_end.addListener]{@link TurboEvent#addListener} instead.*/ submit_end: (callback, options) => turboEvents.submit_end.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.submit_start.addListener]{@link TurboEvent#addListener} instead.*/ submit_start: (callback, options) => turboEvents.submit_start.addListener(callback, options),
+        /** @deprecated Use [wkof.turbo.events.visit.addListener]{@link TurboEvent#addListener} instead.*/ visit: (callback, options) => turboEvents.visit.addListener(callback, options),
     }; Object.freeze(turboListeners);
     /** Container for various commonly used objects. */
     const common = {}; Object.defineProperties(common,{
@@ -181,8 +186,7 @@
         /** @see addTypicalPageListener */ lessons_quiz: {value: (callback, options) => addTypicalPageListener(callback, common.locations.lessons_quiz, options)},
         /** @see addTypicalPageListener */ reviews: {value: (callback, options) => addTypicalPageListener(callback, common.locations.reviews, options)},
     });
-    /** Container for various event listeners.
-     */
+    /** Container for various event listeners. */
     const eventMap = {}; Object.defineProperties(eventMap, {
         common: {value: commonListeners},
         event: {value: turboListeners},
