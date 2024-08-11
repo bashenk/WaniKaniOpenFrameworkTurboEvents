@@ -48,9 +48,9 @@ The `wkof.turbo` object has the following properties and methods
 - #### `remove_event_listener(eventName, listener, options)`: `boolean`
   - Returns `true` when the listener was successfully removed or `false` when the inputs were invalid or when no active listener matching the parameters was found.
 
-- #### `on`
+- #### `on`: `object`
 
-  - ##### `common`
+  - ##### `common`: `object`
      - Contains non-writable convenience functions for common use cases.
      - Note that the object itself is extensible, so additional functions may be added if desired.
      - ~~`events(eventList, callback, options)`~~ Deprecated. Use [eventList(eventList, callback, options)](#eventlisteventlist-callback-options-name-string-added-boolean).
@@ -90,8 +90,8 @@ The `wkof.turbo` object has the following properties and methods
         - Callback is triggered whenever the user visits the "reviews" page and the page has fully loaded.
         - Convenience function for [add_typical_page_listener(callback, wkof.turbo.common.locations.reviews, options)](#add_typical_page_listenercallback-urls-options-boolean).
 
-  - ##### ~~`event`~~
-     - Deprecated. Use the `addListener` method in the [events](#events) object.
+  - ##### ~~`event`~~: `object`
+     - Deprecated. Use the `addListener` method in the [events](#events-object) object.
      - ~~Contains functions to set listeners for each of the Turbo events. For the return values, see `add_event_listener(eventName, listener, options)`~~
      - ~~`before_cache(callback, options)`~~
      - ~~`before_fetch_request(callback, options)`~~
@@ -116,140 +116,140 @@ The `wkof.turbo` object has the following properties and methods
      - ~~`submit_start(callback, options)`~~
      - ~~`visit(callback, options)`~~
 
-- ##### `events`
+- ##### `events`: `object`
   - Each of the following keys is also accessible using the `turbo:` syntax that matches the `name` property (e.g. `wkof.turbo.events['turbo:before-render']`).
 
-  - ###### `click`
+  - ###### `click`: `object`
      - `source`: "document"
      - `name`: "turbo:click"
      - `addListener(callback, options)`: `boolean`
 
-  - ###### `before_visit`
+  - ###### `before_visit`: `object`
      - `source`: "document"
      - `name`: "turbo:before-visit"
      - `addListener(callback, options)`: `boolean`
 
-  - ###### `visit`
+  - ###### `visit`: `object`
      - `source`: "document"
      - `name`: "turbo:visit"
      - `addListener(callback, options)`: `boolean`
 
-  - ###### `before_cache`
+  - ###### `before_cache`: `object`
      - `source`: "document"
      - `name`: "turbo:before-cache"
      - `addListener(callback, options)`: `boolean`
 
-  - ###### `before_render`
+  - ###### `before_render`: `object`
      - `source`: "document"
      - `name`: "turbo:before-render"
      - `addListener(callback, options)`: `boolean`
 
-  - ###### `render`
+  - ###### `render`: `object`
      - `source`: "document"
      - `name`: "turbo:render"
      - `addListener(callback, options)`: `boolean`
 
-  - ###### `load`
+  - ###### `load`: `object`
      - `source`: "document"
      - `name`: "turbo:load"
      - `addListener(callback, options)`: `boolean`
 
-  - ###### `morph`
+  - ###### `morph`: `object`
      - `source`: "pageRefresh"
      - `name`: "turbo:morph"
      - `addListener(callback, options)`: `boolean`
 
-  - ###### `before_morph_element`
+  - ###### `before_morph_element`: `object`
      - `source`: "pageRefresh"
      - `name`: "turbo:before-morph-element"
      - `addListener(callback, options)`: `boolean`
 
-  - ###### `before_morph_attribute`
+  - ###### `before_morph_attribute`: `object`
      - `source`: "pageRefresh"
      - `name`: "turbo:before-morph-attribute"
      - `addListener(callback, options)`: `boolean`
 
-  - ###### `morph_element`
+  - ###### `morph_element`: `object`
      - `source`: "pageRefresh"
      - `name`: "turbo:morph-element"
      - `addListener(callback, options)`: `boolean`
 
-  - ###### `submit_start`
+  - ###### `submit_start`: `object`
      - `source`: "forms"
      - `name`: "turbo:submit-start"
      - `addListener(callback, options)`: `boolean`
 
-  - ###### `submit_end`
+  - ###### `submit_end`: `object`
      - `source`: "forms"
      - `name`: "turbo:submit-end"
      - `addListener(callback, options)`: `boolean`
 
-  - ###### `before_frame_render`
+  - ###### `before_frame_render`: `object`
      - `source`: "frames"
      - `name`: "turbo:before-frame-render"
      - `addListener(callback, options)`: `boolean`
 
-  - ###### `frame_render`
+  - ###### `frame_render`: `object`
      - `source`: "frames"
      - `name`: "turbo:frame-render"
      - `addListener(callback, options)`: `boolean`
 
-  - ###### `frame_load`
+  - ###### `frame_load`: `object`
      - `source`: "frames"
      - `name`: "turbo:frame-load"
      - `addListener(callback, options)`: `boolean`
 
-  - ###### `frame_missing`
+  - ###### `frame_missing`: `object`
      - `source`: "frames"
      - `name`: "turbo:frame-missing"
      - `addListener(callback, options)`: `boolean`
 
-  - ###### `before_stream_render`
+  - ###### `before_stream_render`: `object`
      - `source`: "streams"
      - `name`: "turbo:before-stream-render"
      - `addListener(callback, options)`: `boolean`
 
-  - ###### `before_fetch_request`
+  - ###### `before_fetch_request`: `object`
      - `source`: "httpRequests"
      - `name`: "turbo:before-fetch-request"
      - `addListener(callback, options)`: `boolean`
 
-  - ###### `before_fetch_response`
+  - ###### `before_fetch_response`: `object`
      - `source`: "httpRequests"
      - `name`: "turbo:before-fetch-response"
      - `addListener(callback, options)`: `boolean`
 
-  - ###### `before_prefetch`
+  - ###### `before_prefetch`: `object`
      - `source`: "httpRequests"
      - `name`: "turbo:before-prefetch"
      - `addListener(callback, options)`: `boolean`
 
-  - ###### `fetch_request_error`
+  - ###### `fetch_request_error`: `object`
      - `source`: "httpRequests"
      - `name`: "turbo:fetch-request-error"
      - `addListener(callback, options)`: `boolean`
 
-- ##### `common`
+- ##### `common`: `object`
 
-  - ###### `locations`
+  - ###### `locations`: `object`
      - Contains non-writable `RegExp` objects to match against the URLs for typical pages.
 
-     - ###### `dashboard`
+     - ###### `dashboard`: `RegExp`
         - `/^https:\/\/www\.wanikani\.com(\/dashboard.*)?\/?$/`
 
-     - ###### `items_pages`
+     - ###### `items_pages`: `RegExp`
         - `/^https:\/\/www\.wanikani\.com\/(radicals|kanji|vocabulary)\/.+\/?$/`
 
-     - ###### `lessons`
+     - ###### `lessons`: `RegExp`
         - `/^https:\/\/www\.wanikani\.com\/subject-lessons\/(start|[\d-]+\/\d+)\/?$/`
 
-     - ###### `lessons_picker`
+     - ###### `lessons_picker`: `RegExp`
         - `/^https:\/\/www\.wanikani\.com\/subject-lessons\/picker\/?$/`
 
-     - ###### `lessons_quiz`
+     - ###### `lessons_quiz`: `RegExp`
         - `/^https:\/\/www\.wanikani\.com\/subject-lessons\/[\d-]+\/quiz.*\/?$/`
 
-     - ###### `reviews`
+     - ###### `reviews`: `RegExp`
         - `/^https:\/\/www\.wanikani\.com\/subjects\/review.*\/?$/`
 
 
