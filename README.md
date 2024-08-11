@@ -19,164 +19,279 @@ All additions are added to a new `turbo` property of the `wkof` object, thus acc
 
 
 
-### The exposed `wkof.turbo` object
+---
 
 
 
-The `wkof.turbo` object has the following properties and methods:
+### The `wkof.turbo` object
 
-> - `add_event_listener(eventName, listener, options)`
->   - returns: `boolean`
->      - `true`: when the listener was successfully added.
->      - `false`: when the inputs were invalid.
->      - Note that in the "load" special case (explained below), a listener is not added, and this instead returns `true` or `false` depending on whether the callback was successfully fired immediately.
-> - `remove_event_listener(eventName, listener, options)`
->    - returns: `boolean`
->      - `true`: when the listener was removed successfully.
->      - `false`: when the inputs were invalid or when no active listener matching the parameters is found.
-> - `on`
->   - `common`
->      - Contains non-writable convenience functions for common use cases.
->      - For the return values of all except `events(eventList, callback, options)`, see `add_event_listener(eventName, listener, options)`
->      - `events(eventList, callback, options)`
->         - returns: `[]`
->           - Each entry contains an object with properties `name: string` and `added: boolean`, indicating the result of each item in `eventList`.
->      - `urls(callback, urls, options)`
->      - `targetIds(callback, targetIds, options)`
->      - `dashboard(callback, options)`
->      - `items_pages(callback, options)`
->      - `lessons(callback, options)`
->      - `lessons_picker(callback, options)`
->      - `lessons_quiz(callback, options)`
->      - `reviews(callback, options)`
->   - `event` (Frozen object)
->      - Contains functions to set listeners for each of the Turbo events.
->      - For the return values, see `add_event_listener(eventName, listener, options)`
->      - `before_cache(callback, urls, options)`
->      - `before_fetch_request(callback, urls, options)`
->      - `before_fetch_response(callback, urls, options)`
->      - `before_frame_render(callback, urls, options)`
->      - `before_morph_attribute(callback, urls, options)`
->      - `before_morph_element(callback, urls, options)`
->      - `before_prefetch(callback, urls, options)`
->      - `before_render(callback, urls, options)`
->      - `before_stream_render(callback, urls, options)`
->      - `before_visit(callback, urls, options)`
->      - `click(callback, urls, options)`
->      - `fetch_request_error(callback, urls, options)`
->      - `frame_load(callback, urls, options)`
->      - `frame_missing(callback, urls, options)`
->      - `frame_render(callback, urls, options)`
->      - `load(callback, urls, options)`
->      - `morph(callback, urls, options)`
->      - `morph_element(callback, urls, options)`
->      - `render(callback, urls, options)`
->      - `submit_end(callback, urls, options)`
->      - `submit_start(callback, urls, options)`
->      - `visit(callback, urls, options)`
-> - `events` (Frozen object)
->   -  Each of these also has a `handler` property, which is used internally to handle the event. 
->   - `click`
->      - `source: 'document'`
->      - `name: 'turbo:click'`
->   - `before_visit`
->      - `source: 'document'`
->      - `name: 'turbo:before-visit'`
->   - `visit`
->      - `source: 'document'`
->      - `name: 'turbo:visit'`
->   - `before_cache`
->      - `source: 'document'`
->      - `name: 'turbo:before-cache'`
->   - `before_render`
->      - `source: 'document'`
->      - `name: 'turbo:before-render'`
->   - `render`
->      - `source: 'document'`
->      - `name: 'turbo:render'`
->   - `load`
->      - `source: 'document'`
->      - `name: 'turbo:load'`
->   - `morph`
->      - `source: 'pageRefresh'`
->      - `name: 'turbo:morph'`
->   - `before_morph_element`
->      - `source: 'pageRefresh'`
->      - `name: 'turbo:before-morph-element'`
->   - `before_morph_attribute`
->      - `source: 'pageRefresh'`
->      - `name: 'turbo:before-morph-attribute'`
->   - `morph_element`
->      - `source: 'pageRefresh'`
->      - `name: 'turbo:morph-element'`
->   - `submit_start`
->      - `source: 'forms'`
->      - `name: 'turbo:submit-start'`
->   - `submit_end`
->      - `source: 'forms'`
->      - `name: 'turbo:submit-end'`
->   - `before_frame_render`
->      - `source: 'frames'`
->      - `name: 'turbo:before-frame-render'`
->   - `frame_render`
->      - `source: 'frames'`
->      - `name: 'turbo:frame-render'`
->   - `frame_load`
->      - `source: 'frames'`
->      - `name: 'turbo:frame-load'`
->   - `frame_missing`
->      - `source: 'frames'`
->      - `name: 'turbo:frame-missing'`
->   - `before_stream_render`
->      - `source: 'streams'`
->      - `name: 'turbo:before-stream-render'`
->   - `before_fetch_request`
->      - `source: 'httpRequests'`
->      - `name: 'turbo:before-fetch-request'`
->   - `before_fetch_response`
->      - `source: 'httpRequests'`
->      - `name: 'turbo:before-fetch-response'`
->   - `before_prefetch`
->      - `source: 'httpRequests'`
->      - `name: 'turbo:before-prefetch'`
->   - `fetch_request_error`
->      - `source: 'httpRequests'`
->      - `name: 'turbo:fetch-request-error'`
-> - `common`
->   - `locations`: contains non-writable `RegExp` objects to match against the URLs for typical pages.
->      - `dashboard`
->      - `items_pages`
->      - `lessons`
->      - `lessons_picker`
->      - `lessons_quiz`
->      - `reviews`
 
+
+The `wkof.turbo` object has the following properties and methods
+(methods are all non-writable; properties are all non-writable and extensible unless noted otherwise):
+
+- #### `add_event_listener(eventName, listener, options)`: `boolean`
+  - The most simple way of adding a listener.
+  - Returns `true` when the listener was successfully added or `false` when the inputs were invalid or the provided listener and options already exists.
+     - Note that in the "load" [special case (explained below)](#special-cases), a listener is not added, and this instead returns `true` or `false` according to whether the callback was called immediately.
+
+- #### `add_typical_page_listener(callback, urls, options)`: `boolean`
+  - Merges the provided `urls` into the `options` parameter.
+  - Under the hood, this also silently uses the "load" [special case](#special-cases) event to ensure that the callback is called at least once upon the first page load.
+  - See: [add_event_listener(eventName, listener, options)](#add_event_listenereventname-listener-options-boolean).
+
+- #### `add_typical_frame_listener(callback, targetIds, options)`: `boolean`
+  - Merges the provided `targetIds` into the `options` parameter.
+  - Under the hood, this also silently uses the "load" [special case](#special-cases) event to ensure that the callback is called at least once upon the first page load.
+  - See: [add_event_listener(eventName, listener, options)](#add_event_listenereventname-listener-options-boolean).
+
+- #### `remove_event_listener(eventName, listener, options)`: `boolean`
+  - Returns `true` when the listener was successfully removed or `false` when the inputs were invalid or when no active listener matching the parameters was found.
+
+- #### `on`
+
+  - ##### `common`
+     - Contains non-writable convenience functions for common use cases.
+     - Note that the object itself is extensible, so additional functions may be added if desired.
+     - ~~`events(eventList, callback, options)`~~ Deprecated. Use [eventList(eventList, callback, options)](#eventlisteventlist-callback-options-name-string-added-boolean).
+  
+     - ###### `eventList(eventList, callback, options)`: `{name: string, added: boolean}[]`
+        - Each returned object's `name` is the name of the event and `added` indicates the result of the [add_event_listener](#add_event_listenereventname-listener-options-boolean) operation for that listener.
+
+     - ###### `targetIds(callback, targetIds, options)`: `boolean`
+        - Callback is triggered whenever a frame is loaded with an element `id` that matches one of the provided `targetIds`.
+        - Convenience function for [add_typical_frame_listener(callback, targetIds, options)](#add_typical_frame_listenercallback-targetids-options-boolean).
+
+     - ###### `urls(callback, urls, options)`: `boolean`
+        - Callback is triggered whenever the user visits any of the URLs provided and the page has fully loaded.
+        - Convenience function for [add_typical_page_listener(callback, urls, options)](#add_typical_page_listenercallback-urls-options-boolean).
+
+     - ###### `dashboard(callback, options)`: `boolean`
+        - Callback is triggered whenever the user visits the "dashboard" and the page has fully loaded.
+        - Convenience function for [add_typical_page_listener(callback, wkof.turbo.common.locations.dashboard, options)](#add_typical_page_listenercallback-urls-options-boolean).
+
+     - ###### `items_pages(callback, options)`: `boolean`
+        - Callback is triggered whenever the user visits the page for any of the specific items (radical, kanji, vocab) and the page has fully loaded.
+        - Convenience function for [add_typical_page_listener(callback, wkof.turbo.common.locations.items_pages, options)](#add_typical_page_listenercallback-urls-options-boolean).
+
+     - ###### `lessons(callback, options)`: `boolean`
+        - Callback is triggered whenever the user visits the "lessons" page and the page has fully loaded.
+        - Convenience function for [add_typical_page_listener(callback, wkof.turbo.common.locations.lessons, options)](#add_typical_page_listenercallback-urls-options-boolean).
+
+     - ###### `lessons_picker(callback, options)`: `boolean`
+        - Callback is triggered whenever the user visits the "lessons" picker page and the page has fully loaded.
+        - Convenience function for [add_typical_page_listener(callback, wkof.turbo.common.locations.lessons_picker, options)](#add_typical_page_listenercallback-urls-options-boolean).
+
+     - ###### `lessons_quiz(callback, options)`: `boolean`
+        - Callback is triggered whenever the user begins the "lessons" quiz page and the page has fully loaded.
+        - Convenience function for [add_typical_page_listener(callback, wkof.turbo.common.locations.lessons_quiz, options)](#add_typical_page_listenercallback-urls-options-boolean).
+
+     - ###### `reviews(callback, options)`: `boolean`
+        - Callback is triggered whenever the user visits the "reviews" page and the page has fully loaded.
+        - Convenience function for [add_typical_page_listener(callback, wkof.turbo.common.locations.reviews, options)](#add_typical_page_listenercallback-urls-options-boolean).
+
+  - ##### ~~`event`~~
+     - Deprecated. Use the `addListener` method in the [events](#events) object.
+     - ~~Contains functions to set listeners for each of the Turbo events. For the return values, see `add_event_listener(eventName, listener, options)`~~
+     - ~~`before_cache(callback, options)`~~
+     - ~~`before_fetch_request(callback, options)`~~
+     - ~~`before_fetch_response(callback, options)`~~
+     - ~~`before_frame_render(callback, options)`~~
+     - ~~`before_morph_attribute(callback, options)`~~
+     - ~~`before_morph_element(callback, options)`~~
+     - ~~`before_prefetch(callback, options)`~~
+     - ~~`before_render(callback, options)`~~
+     - ~~`before_stream_render(callback, options)`~~
+     - ~~`before_visit(callback, options)`~~
+     - ~~`click(callback, options)`~~
+     - ~~`fetch_request_error(callback, options)`~~
+     - ~~`frame_load(callback, options)`~~
+     - ~~`frame_missing(callback, options)`~~
+     - ~~`frame_render(callback, options)`~~
+     - ~~`load(callback, options)`~~
+     - ~~`morph(callback, options)`~~
+     - ~~`morph_element(callback, options)`~~
+     - ~~`render(callback, options)`~~
+     - ~~`submit_end(callback, options)`~~
+     - ~~`submit_start(callback, options)`~~
+     - ~~`visit(callback, options)`~~
+
+- ##### `events`
+  - Each of the following keys is also accessible using the `turbo:` syntax that matches the `name` property (e.g. `wkof.turbo.events['turbo:before-render']`).
+
+  - ###### `click`
+     - `source`: "document"
+     - `name`: "turbo:click"
+     - `addListener(callback, options)`: `boolean`
+
+  - ###### `before_visit`
+     - `source`: "document"
+     - `name`: "turbo:before-visit"
+     - `addListener(callback, options)`: `boolean`
+
+  - ###### `visit`
+     - `source`: "document"
+     - `name`: "turbo:visit"
+     - `addListener(callback, options)`: `boolean`
+
+  - ###### `before_cache`
+     - `source`: "document"
+     - `name`: "turbo:before-cache"
+     - `addListener(callback, options)`: `boolean`
+
+  - ###### `before_render`
+     - `source`: "document"
+     - `name`: "turbo:before-render"
+     - `addListener(callback, options)`: `boolean`
+
+  - ###### `render`
+     - `source`: "document"
+     - `name`: "turbo:render"
+     - `addListener(callback, options)`: `boolean`
+
+  - ###### `load`
+     - `source`: "document"
+     - `name`: "turbo:load"
+     - `addListener(callback, options)`: `boolean`
+
+  - ###### `morph`
+     - `source`: "pageRefresh"
+     - `name`: "turbo:morph"
+     - `addListener(callback, options)`: `boolean`
+
+  - ###### `before_morph_element`
+     - `source`: "pageRefresh"
+     - `name`: "turbo:before-morph-element"
+     - `addListener(callback, options)`: `boolean`
+
+  - ###### `before_morph_attribute`
+     - `source`: "pageRefresh"
+     - `name`: "turbo:before-morph-attribute"
+     - `addListener(callback, options)`: `boolean`
+
+  - ###### `morph_element`
+     - `source`: "pageRefresh"
+     - `name`: "turbo:morph-element"
+     - `addListener(callback, options)`: `boolean`
+
+  - ###### `submit_start`
+     - `source`: "forms"
+     - `name`: "turbo:submit-start"
+     - `addListener(callback, options)`: `boolean`
+
+  - ###### `submit_end`
+     - `source`: "forms"
+     - `name`: "turbo:submit-end"
+     - `addListener(callback, options)`: `boolean`
+
+  - ###### `before_frame_render`
+     - `source`: "frames"
+     - `name`: "turbo:before-frame-render"
+     - `addListener(callback, options)`: `boolean`
+
+  - ###### `frame_render`
+     - `source`: "frames"
+     - `name`: "turbo:frame-render"
+     - `addListener(callback, options)`: `boolean`
+
+  - ###### `frame_load`
+     - `source`: "frames"
+     - `name`: "turbo:frame-load"
+     - `addListener(callback, options)`: `boolean`
+
+  - ###### `frame_missing`
+     - `source`: "frames"
+     - `name`: "turbo:frame-missing"
+     - `addListener(callback, options)`: `boolean`
+
+  - ###### `before_stream_render`
+     - `source`: "streams"
+     - `name`: "turbo:before-stream-render"
+     - `addListener(callback, options)`: `boolean`
+
+  - ###### `before_fetch_request`
+     - `source`: "httpRequests"
+     - `name`: "turbo:before-fetch-request"
+     - `addListener(callback, options)`: `boolean`
+
+  - ###### `before_fetch_response`
+     - `source`: "httpRequests"
+     - `name`: "turbo:before-fetch-response"
+     - `addListener(callback, options)`: `boolean`
+
+  - ###### `before_prefetch`
+     - `source`: "httpRequests"
+     - `name`: "turbo:before-prefetch"
+     - `addListener(callback, options)`: `boolean`
+
+  - ###### `fetch_request_error`
+     - `source`: "httpRequests"
+     - `name`: "turbo:fetch-request-error"
+     - `addListener(callback, options)`: `boolean`
+
+- ##### `common`
+
+  - ###### `locations`
+     - Contains non-writable `RegExp` objects to match against the URLs for typical pages.
+
+     - ###### `dashboard`
+        - `/^https:\/\/www\.wanikani\.com(\/dashboard.*)?\/?$/`
+
+     - ###### `items_pages`
+        - `/^https:\/\/www\.wanikani\.com\/(radicals|kanji|vocabulary)\/.+\/?$/`
+
+     - ###### `lessons`
+        - `/^https:\/\/www\.wanikani\.com\/subject-lessons\/(start|[\d-]+\/\d+)\/?$/`
+
+     - ###### `lessons_picker`
+        - `/^https:\/\/www\.wanikani\.com\/subject-lessons\/picker\/?$/`
+
+     - ###### `lessons_quiz`
+        - `/^https:\/\/www\.wanikani\.com\/subject-lessons\/[\d-]+\/quiz.*\/?$/`
+
+     - ###### `reviews`
+        - `/^https:\/\/www\.wanikani\.com\/subjects\/review.*\/?$/`
+
+
+
+---
 
 
 ### General notes
 
 
 
-- The callback function is passed the arguments `(event, url)` for all Turbo events.
-  - The `event` parameter is the event object, passed straight from the event triggered.
-  - The `url` parameter is a URL string, which has been parsed from the event, using predetermined logic to detect the URL most likely of use to the end user. This URL is associated with the details of the triggered event, usually referencing the result of whatever action has transpired.
-  - For the special case "load" event (discussed below), `event` contains the string "load" and `url` contains a string of the current page URL.
+- The callback function is invoked with the parameters `(event: CustomEvent, url: string)` for all events.
+  - The `event` parameter is the `CustomEvent` object, passed directly from the triggered event.
+    - The name of the event triggered can be verified using `event.type`.
+      - For example, `event.type === 'turbo:load'`.
+  - The `url` parameter is a URL string, which has been parsed from the event, using predetermined logic to detect the URL most likely of use to the end user. **This URL is associated with the details of the triggered event**, usually **referencing the result or target** of whatever action has transpired or is preparing to transpire.
+  - For the special case "load" event (discussed below), `event.type` is "load" and `url` contains a string of the current page URL.
 - **Always** set the `@match` userscript directive to `https://www.wanikani.com/*` or equivalent.
     - Otherwise, the script may not end up running if the user refreshes the page somewhere unexpected.
+- Most of the convenience functions in `wkof.turbo.on.common` utilize the custom "load" event.
+  - Specifically, the following functions match this behavior:
+    - `urls`, `dashboard`, `items_pages`, `lessons`, `lessons_picker`, `lessons_quiz`, `reviews`
 
 Typical usage involves one of the following:
-1. Use one of the convenience functions in `wkof.turbo.on.common` if one meets your requirements.
-2. Pass one or more URLs to the method in `wkof.turbo.on.event` that will be used. 
+1. Use one of the convenience functions in `wkof.turbo.on.common` if one meets requirements.
+2. Pass one or more URLs to the `addListener` method of the specific `TurboEvent` object in `wkof.turbo.events` that will be used. 
    - URLs can be passed using a `urls` property in the object passed to the `options` parameter
      - For example, `{urls: myUrl}` or `{urls: [myUrl1, myUrl2]}`
    - Inputs for the urls property can be a `string`, a `RegExp`, or an array consisting of a mixture of those.
+   - For example, `wkof.turbo.events.before_render.addListener(callback, {urls: 'https://www.wanikani.com/level/*'})`.
 
 
 #### Special cases
 
 
 - "load" (not to be confused with "turbo:load") is a special use case event name.
-  - Adding a listener for that event via this library causes it to execute the callback immediately after it is added in the case that the URL matches and the "turbo:load" event has already fired.
+  - Adding a listener for that event via this library causes it to execute the callback immediately after it is added in the case that the URL matches and the page has already finished loading, according to the `window.Turbo` session.
+  - Callback:
+    - Parameters: `(event: CustomEvent, url: string) => void`.
+    - The `event` object is a `CustomEvent` constructed as follows:
+      - `new CustomEvent('load', {bubbles: false, cancelable: false, composed: false, target: document.documentElement})`.
+    - The `url` string returned is the current location, according to the `window.Turbo` session.
 
 
 #### The "options" parameter
@@ -195,8 +310,8 @@ The following table is a full description of the options available.
 |    nocache     |                  `boolean`                  |    yes    | Indicates whether to ignore events involving Turbo's cached pages. See https://discuss.hotwired.dev/t/before-cache-render-event/4928/4.<br/>If not specified, defaults to `false`.                                                                                                                                                                                                              |
 |      once      |                  `boolean`                  |    yes    | Indicates that the listener should be invoked at most once after being added. If `true`, the listener would be automatically removed when invoked.<br/>If not specified, defaults to `false`.                                                                                                                                                                                                   |
 |    capture     |                  `boolean`                  |    yes    | Indicates that events of this type will be dispatched to the registered listener before being dispatched to any `EventTarget` beneath it in the DOM tree.<br/>If not specified, defaults to `false`.                                                                                                                                                                                            |
-|    passive     |                  `boolean`                  |    no     | If `true`, indicates that the function specified by listener will never call `preventDefault()`. If a passive listener does call `preventDefault()`, the user agent will do nothing other than generate a console warning.<br/>If not specified, defaults to `false` – except that in browsers other than Safari, it defaults to `true` for wheel, mousewheel, touchstart and touchmove events. |
-|     signal     |                `AbortSignal`                |    no     | The listener will be removed when the given AbortSignal object's `abort()` method is called.<br/>If not specified, no `AbortSignal` is associated with the listener.                                                                                                                                                                                                                            |
+|    passive     |                  `boolean`                  |    yes    | If `true`, indicates that the function specified by listener will never call `preventDefault()`. If a passive listener does call `preventDefault()`, the user agent will do nothing other than generate a console warning.<br/>If not specified, defaults to `false` – except that in browsers other than Safari, it defaults to `true` for wheel, mousewheel, touchstart and touchmove events. |
+|     signal     |                `AbortSignal`                |    yes    | The listener will be removed when the given `AbortSignal` object's `abort()` method is called.<br/>If not specified, no `AbortSignal` is associated with the listener.                                                                                                                                                                                                                          |
 
 
 
@@ -268,7 +383,7 @@ function configureTurbo() {
     const eventList = ['load', wkof.turbo.events.load];
 
     // Setup the listener
-    wkof.turbo.on.common.events(eventList, main, options);
+    wkof.turbo.on.common.eventList(eventList, main, options);
 }
 
 function main() {
@@ -298,7 +413,7 @@ function configurePageHandler() {
         urls: [wkof.turbo.common.locations.dashboard, wkof.turbo.common.locations.items_pages]
     };
     // Run the callback on the "turbo:before-render" event.
-    wkof.turbo.on.event.before_render(myFunction, options1);
+    wkof.turbo.events.before_render.addListener(myFunction, options1);
 
     // Run the callback on initial page load, turbo:before-render, and turbo:frame_render.
     // See the special case note about "load" in the preceding section.
@@ -312,7 +427,7 @@ function configurePageHandler() {
     // The first parameter can be an array including either the Turbo event object that is provided
     // (wkof.turbo.events.before_render) or the string itself ("turbo:before-render").
     // Note that two new listeners are added in this example, one for each **Turbo** event.
-    wkof.turbo.on.common.events(eventList, myFunction, options2);
+    wkof.turbo.on.common.eventList(eventList, myFunction, options2);
 
     // Remove listeners by using `wkof.turbo.remove_event_listener(eventName, listener, options)`.
     // In this scenario, the result would presumably be [false, true, true], since the "load" event
