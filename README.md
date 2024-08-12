@@ -39,6 +39,7 @@ The `wkof.turbo` object has the following properties and methods
 - #### add\_event\_listeners(eventList, listener, options): `{name: string, added: boolean}[]`
 
     - Each returned object's `name` is the name of the event and `added` indicates the result of the [wkof.turbo.add\_event\_listener(name, listener, options)](#add_event_listenereventname-listener-options-boolean) operation for that listener.
+    - Added in version 4.1.1.
 
 - #### add\_typical\_page\_listener(callback, urls, options): `boolean`
 
