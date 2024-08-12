@@ -52,6 +52,10 @@ The `wkof.turbo` object has the following properties and methods
 
     - Returns `true` when the listener was successfully removed or `false` when the inputs were invalid or when no active listener matching the parameters was found.
 
+- #### remove_event_listeners(eventList, listener, options): `{name: string, removed: boolean}[]`
+
+    - Each returned object's `name` is the name of the event and `removed` indicates the result of the [remove_event_listener](#remove_event_listenereventName-listener-options-boolean) operation for that listener.
+
 - #### on: `object`
 
     - #### common: `object`
