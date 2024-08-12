@@ -30,31 +30,31 @@ All additions are added to a new `turbo` property of the `wkof` object, thus acc
 The `wkof.turbo` object has the following properties and methods
 (methods are all non-writable; properties are all non-writable and extensible unless noted otherwise):
 
-- #### add_event_listener(eventName, listener, options): `boolean`
+- #### add\_event\_listener(eventName, listener, options): `boolean`
 
     - The most simple way of adding a listener.
     - Returns `true` when the listener was successfully added or `false` when the inputs were invalid or the provided listener and options already exists.
         - Note that in the "load" [special case (explained below)](#special-cases), a listener is not added, and this instead returns `true` or `false` according to whether the callback was called immediately.
 
-- #### add_typical_page_listener(callback, urls, options): `boolean`
+- #### add\_typical\_page\_listener(callback, urls, options): `boolean`
 
     - Merges the provided `urls` into the `options` parameter.
     - Under the hood, this also silently uses the "load" [special case](#special-cases) event to ensure that the callback is called at least once upon the first page load.
-    - See: [add_event_listener(eventName, listener, options)](#add_event_listenereventname-listener-options-boolean).
+    - See: [add\_event\_listener(eventName, listener, options)](#add_event_listenereventname-listener-options-boolean).
 
-- #### add_typical_frame_listener(callback, targetIds, options): `boolean`
+- #### add\_typical\_frame\_listener(callback, targetIds, options): `boolean`
 
     - Merges the provided `targetIds` into the `options` parameter.
     - Under the hood, this also silently uses the "load" [special case](#special-cases) event to ensure that the callback is called at least once upon the first page load.
-    - See: [add_event_listener(eventName, listener, options)](#add_event_listenereventname-listener-options-boolean).
+    - See: [add\_event\_listener(eventName, listener, options)](#add_event_listenereventname-listener-options-boolean).
 
-- #### remove_event_listener(eventName, listener, options): `boolean`
+- #### remove\_event\_listener(eventName, listener, options): `boolean`
 
     - Returns `true` when the listener was successfully removed or `false` when the inputs were invalid or when no active listener matching the parameters was found.
 
-- #### remove_event_listeners(eventList, listener, options): `{name: string, removed: boolean}[]`
+- #### remove\_event\_listeners(eventList, listener, options): `{name: string, removed: boolean}[]`
 
-    - Each returned object's `name` is the name of the event and `removed` indicates the result of the [remove_event_listener](#remove_event_listenereventName-listener-options-boolean) operation for that listener.
+    - Each returned object's `name` is the name of the event and `removed` indicates the result of the [remove\_event\_listener](#remove_event_listenereventName-listener-options-boolean) operation for that listener.
 
 - #### on: `object`
 
@@ -71,42 +71,42 @@ The `wkof.turbo` object has the following properties and methods
         - #### targetIds(callback, targetIds, options): `boolean`
 
             - Callback is triggered whenever a frame is loaded with an element `id` that matches one of the provided `targetIds`.
-            - Convenience function for [add_typical_frame_listener(callback, targetIds, options)](#add_typical_frame_listenercallback-targetids-options-boolean).
+            - Convenience function for [add\_typical\_frame\_listener(callback, targetIds, options)](#add_typical_frame_listenercallback-targetids-options-boolean).
 
         - #### urls(callback, urls, options): `boolean`
 
             - Callback is triggered whenever the user visits any of the URLs provided and the page has fully loaded.
-            - Convenience function for [add_typical_page_listener(callback, urls, options)](#add_typical_page_listenercallback-urls-options-boolean).
+            - Convenience function for [add\_typical\_page\_listener(callback, urls, options)](#add_typical_page_listenercallback-urls-options-boolean).
 
         - #### dashboard(callback, options): `boolean`
 
             - Callback is triggered whenever the user visits the "dashboard" and the page has fully loaded.
-            - Convenience function for [add_typical_page_listener(callback, wkof.turbo.common.locations.dashboard, options)](#add_typical_page_listenercallback-urls-options-boolean).
+            - Convenience function for [add\_typical\_page\_listener(callback, wkof.turbo.common.locations.dashboard, options)](#add_typical_page_listenercallback-urls-options-boolean).
 
-        - #### items_pages(callback, options): `boolean`
+        - #### items\_pages(callback, options): `boolean`
 
             - Callback is triggered whenever the user visits the page for any of the specific items (radical, kanji, vocab) and the page has fully loaded.
-            - Convenience function for [add_typical_page_listener(callback, wkof.turbo.common.locations.items_pages, options)](#add_typical_page_listenercallback-urls-options-boolean).
+            - Convenience function for [add\_typical\_page\_listener(callback, wkof.turbo.common.locations.items\_pages, options)](#add_typical_page_listenercallback-urls-options-boolean).
 
         - #### lessons(callback, options): `boolean`
 
             - Callback is triggered whenever the user visits the "lessons" page and the page has fully loaded.
-            - Convenience function for [add_typical_page_listener(callback, wkof.turbo.common.locations.lessons, options)](#add_typical_page_listenercallback-urls-options-boolean).
+            - Convenience function for [add\_typical\_page\_listener(callback, wkof.turbo.common.locations.lessons, options)](#add_typical_page_listenercallback-urls-options-boolean).
 
-        - #### lessons_picker(callback, options): `boolean`
+        - #### lessons\_picker(callback, options): `boolean`
 
             - Callback is triggered whenever the user visits the "lessons" picker page and the page has fully loaded.
-            - Convenience function for [add_typical_page_listener(callback, wkof.turbo.common.locations.lessons_picker, options)](#add_typical_page_listenercallback-urls-options-boolean).
+            - Convenience function for [add\_typical\_page\_listener(callback, wkof.turbo.common.locations.lessons\_picker, options)](#add_typical_page_listenercallback-urls-options-boolean).
 
-        - #### lessons_quiz(callback, options): `boolean`
+        - #### lessons\_quiz(callback, options): `boolean`
 
             - Callback is triggered whenever the user begins the "lessons" quiz page and the page has fully loaded.
-            - Convenience function for [add_typical_page_listener(callback, wkof.turbo.common.locations.lessons_quiz, options)](#add_typical_page_listenercallback-urls-options-boolean).
+            - Convenience function for [add\_typical\_page\_listener(callback, wkof.turbo.common.locations.lessons\_quiz, options)](#add_typical_page_listenercallback-urls-options-boolean).
 
         - #### reviews(callback, options): `boolean`
 
             - Callback is triggered whenever the user visits the "reviews" page and the page has fully loaded.
-            - Convenience function for [add_typical_page_listener(callback, wkof.turbo.common.locations.reviews, options)](#add_typical_page_listenercallback-urls-options-boolean).
+            - Convenience function for [add\_typical\_page\_listener(callback, wkof.turbo.common.locations.reviews, options)](#add_typical_page_listenercallback-urls-options-boolean).
 
     - #### ~~event~~: `object`
 
@@ -145,7 +145,7 @@ The `wkof.turbo` object has the following properties and methods
         - `name`: "turbo:click"
         - `addListener(callback, options)`: `boolean`
 
-    - #### before_visit: `object`
+    - #### before\_visit: `object`
 
         - `source`: "document"
         - `name`: "turbo:before-visit"
@@ -157,13 +157,13 @@ The `wkof.turbo` object has the following properties and methods
         - `name`: "turbo:visit"
         - `addListener(callback, options)`: `boolean`
 
-    - #### before_cache: `object`
+    - #### before\_cache: `object`
 
         - `source`: "document"
         - `name`: "turbo:before-cache"
         - `addListener(callback, options)`: `boolean`
 
-    - #### before_render: `object`
+    - #### before\_render: `object`
 
         - `source`: "document"
         - `name`: "turbo:before-render"
@@ -187,85 +187,85 @@ The `wkof.turbo` object has the following properties and methods
         - `name`: "turbo:morph"
         - `addListener(callback, options)`: `boolean`
 
-    - #### before_morph_element: `object`
+    - #### before\_morph\_element: `object`
 
         - `source`: "pageRefresh"
         - `name`: "turbo:before-morph-element"
         - `addListener(callback, options)`: `boolean`
 
-    - #### before_morph_attribute: `object`
+    - #### before\_morph\_attribute: `object`
 
         - `source`: "pageRefresh"
         - `name`: "turbo:before-morph-attribute"
         - `addListener(callback, options)`: `boolean`
 
-    - #### morph_element: `object`
+    - #### morph\_element: `object`
 
         - `source`: "pageRefresh"
         - `name`: "turbo:morph-element"
         - `addListener(callback, options)`: `boolean`
 
-    - #### submit_start: `object`
+    - #### submit\_start: `object`
 
         - `source`: "forms"
         - `name`: "turbo:submit-start"
         - `addListener(callback, options)`: `boolean`
 
-    - #### submit_end: `object`
+    - #### submit\_end: `object`
 
         - `source`: "forms"
         - `name`: "turbo:submit-end"
         - `addListener(callback, options)`: `boolean`
 
-    - #### before_frame_render: `object`
+    - #### before\_frame\_render: `object`
 
         - `source`: "frames"
         - `name`: "turbo:before-frame-render"
         - `addListener(callback, options)`: `boolean`
 
-    - #### frame_render: `object`
+    - #### frame\_render: `object`
 
         - `source`: "frames"
         - `name`: "turbo:frame-render"
         - `addListener(callback, options)`: `boolean`
 
-    - #### frame_load: `object`
+    - #### frame\_load: `object`
 
         - `source`: "frames"
         - `name`: "turbo:frame-load"
         - `addListener(callback, options)`: `boolean`
 
-    - #### frame_missing: `object`
+    - #### frame\_missing: `object`
 
         - `source`: "frames"
         - `name`: "turbo:frame-missing"
         - `addListener(callback, options)`: `boolean`
 
-    - #### before_stream_render: `object`
+    - #### before\_stream\_render: `object`
 
         - `source`: "streams"
         - `name`: "turbo:before-stream-render"
         - `addListener(callback, options)`: `boolean`
 
-    - #### before_fetch_request: `object`
+    - #### before\_fetch\_request: `object`
 
         - `source`: "httpRequests"
         - `name`: "turbo:before-fetch-request"
         - `addListener(callback, options)`: `boolean`
 
-    - #### before_fetch_response: `object`
+    - #### before\_fetch\_response: `object`
 
         - `source`: "httpRequests"
         - `name`: "turbo:before-fetch-response"
         - `addListener(callback, options)`: `boolean`
 
-    - #### before_prefetch: `object`
+    - #### before\_prefetch: `object`
 
         - `source`: "httpRequests"
         - `name`: "turbo:before-prefetch"
         - `addListener(callback, options)`: `boolean`
 
-    - #### fetch_request_error: `object`
+    - #### fetch\_request\_error: `object`
 
         - `source`: "httpRequests"
         - `name`: "turbo:fetch-request-error"
@@ -281,7 +281,7 @@ The `wkof.turbo` object has the following properties and methods
 
             - `/^https:\/\/www\.wanikani\.com(\/dashboard.*)?\/?$/`
 
-        - #### items_pages: `RegExp`
+        - #### items\_pages: `RegExp`
 
             - `/^https:\/\/www\.wanikani\.com\/(radicals|kanji|vocabulary)\/.+\/?$/`
 
@@ -289,11 +289,11 @@ The `wkof.turbo` object has the following properties and methods
 
             - `/^https:\/\/www\.wanikani\.com\/subject-lessons\/(start|[\d-]+\/\d+)\/?$/`
 
-        - #### lessons_picker: `RegExp`
+        - #### lessons\_picker: `RegExp`
 
             - `/^https:\/\/www\.wanikani\.com\/subject-lessons\/picker\/?$/`
 
-        - #### lessons_quiz: `RegExp`
+        - #### lessons\_quiz: `RegExp`
 
             - `/^https:\/\/www\.wanikani\.com\/subject-lessons\/[\d-]+\/quiz.*\/?$/`
 
@@ -350,17 +350,17 @@ All the events provided have an optional options parameter
 that functions somewhat as an extension of the `AddEventListenerOptions`|`EventListenerOptions` parameters given to `EventTarget.addEventListener()`.
 The following table is a full description of the options available.
 
-|    Property    |                                  Type                                   | Supported | Description                                                                                                                                                                                                                                                                                                                                                                                     |
-|:--------------:|:-----------------------------------------------------------------------:|:---------:|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|      urls      |  `string` \| `RegExp` \| `(string\|RegExp)[]` \| `Set<string\|RegExp>`  |    yes    | The URLs to be verified against the URL parameter.<br/>If not specified, defaults to an empty `Array`.                                                                                                                                                                                                                                                                                          |
-|   targetIds    | `string` \| `string[]` \| `Set<string>` \|<br>`Object.<string,boolean>` |    yes    | The target IDs to be verified against the event target ID.<br/>If not specified, defaults to an empty `Set`.                                                                                                                                                                                                                                                                                    |
-| useDocumentIds |                                `boolean`                                |    yes    | Indicates whether to check the IDs of the document element in addition to the event target for the targetIds.<br/>If not specified, defaults to `false`.                                                                                                                                                                                                                                        |
-|   noTimeout    |                                `boolean`                                |    yes    | Indicates whether to skip use of `setTimeout(callback,0)`, typically used to let the event settle before invoking the callback.<br/>If not specified, defaults to `false`.                                                                                                                                                                                                                      |
-|    nocache     |                                `boolean`                                |    yes    | Indicates whether to ignore events involving Turbo's cached pages. See https://discuss.hotwired.dev/t/before-cache-render-event/4928/4.<br/>If not specified, defaults to `false`.                                                                                                                                                                                                              |
-|      once      |                                `boolean`                                |    yes    | Indicates that the listener should be invoked at most once after being added. If `true`, the listener would be automatically removed when invoked.<br/>If not specified, defaults to `false`.                                                                                                                                                                                                   |
-|    capture     |                                `boolean`                                |    yes    | Indicates that events of this type will be dispatched to the registered listener before being dispatched to any `EventTarget` beneath it in the DOM tree.<br/>If not specified, defaults to `false`.                                                                                                                                                                                            |
-|    passive     |                                `boolean`                                |    yes    | If `true`, indicates that the function specified by listener will never call `preventDefault()`. If a passive listener does call `preventDefault()`, the user agent will do nothing other than generate a console warning.<br/>If not specified, defaults to `false` – except that in browsers other than Safari, it defaults to `true` for wheel, mousewheel, touchstart and touchmove events. |
-|     signal     |                              `AbortSignal`                              |    yes    | The listener will be removed when the given `AbortSignal` object's `abort()` method is called.<br/>If not specified, no `AbortSignal` is associated with the listener.                                                                                                                                                                                                                          |
+|    Property    |                              Type                               | Supported | Description                                                                                                                                                                                                                                                                                                                                                                                     |
+|:--------------:|:---------------------------------------------------------------:|:---------:|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|      urls      | `string`｜`RegExp`｜`(string｜RegExp)[]`｜<br>`Set<string｜RegExp>`  |    yes    | The URLs to be verified against the URL parameter.<br/>If not specified, defaults to an empty `Array`.                                                                                                                                                                                                                                                                                          |
+|   targetIds    | `string`｜`string[]`｜`Set<string>`｜<br>`Object.<string,boolean>` |    yes    | The target IDs to be verified against the event target ID.<br/>If not specified, defaults to an empty `Set`.                                                                                                                                                                                                                                                                                    |
+| useDocumentIds |                            `boolean`                            |    yes    | Indicates whether to check the IDs of the document element in addition to the event target for the targetIds.<br/>If not specified, defaults to `false`.                                                                                                                                                                                                                                        |
+|   noTimeout    |                            `boolean`                            |    yes    | Indicates whether to skip use of `setTimeout(callback,0)`, typically used to let the event settle before invoking the callback.<br/>If not specified, defaults to `false`.                                                                                                                                                                                                                      |
+|    nocache     |                            `boolean`                            |    yes    | Indicates whether to ignore events involving Turbo's cached pages. See https://discuss.hotwired.dev/t/before-cache-render-event/4928/4.<br/>If not specified, defaults to `false`.                                                                                                                                                                                                              |
+|      once      |                            `boolean`                            |    yes    | Indicates that the listener should be invoked at most once after being added. If `true`, the listener would be automatically removed when invoked.<br/>If not specified, defaults to `false`.                                                                                                                                                                                                   |
+|    capture     |                            `boolean`                            |    yes    | Indicates that events of this type will be dispatched to the registered listener before being dispatched to any `EventTarget` beneath it in the DOM tree.<br/>If not specified, defaults to `false`.                                                                                                                                                                                            |
+|    passive     |                            `boolean`                            |    yes    | If `true`, indicates that the function specified by listener will never call `preventDefault()`. If a passive listener does call `preventDefault()`, the user agent will do nothing other than generate a console warning.<br/>If not specified, defaults to `false` – except that in browsers other than Safari, it defaults to `true` for wheel, mousewheel, touchstart and touchmove events. |
+|     signal     |                          `AbortSignal`                          |    yes    | The listener will be removed when the given `AbortSignal` object's `abort()` method is called.<br/>If not specified, no `AbortSignal` is associated with the listener.                                                                                                                                                                                                                          |
 
 
 
