@@ -195,22 +195,10 @@
             // noinspection JSUnresolvedReference
             if (window.Turbo?.session.history.pageLoaded && !wkof.turbo.silenceWarnings)
                 console.warn(`The page has already loaded before adding the Turbo Event listener. The target event "${this.name}" may have already been dispatched.`);
-            return this.#addWrappedListener(listener, TurboListenerOptions.from(options));
-        }
-
-        /**
-         * Removes a listener for this event.
-         *
-         * @param {TurboEventCallback} listener - The callback function to remove.
-         * @param {TurboAddEventListenerOptions} [options] - The options provided when adding the listener.
-         * @return {boolean} Returns `true` if the listener was successfully removed, `false` otherwise.
-         */
-        removeListener(listener, options) {
-            if (listener === undefined || listener === null || typeof listener !== 'function') return false;
             const listenerOptions = TurboListenerOptions.from(options);
             const index = this.#listeners.findIndex(({listener: existingListener, options: existingOptions}) => listener === existingListener && listenerOptions.equals(existingOptions));
             if (index !== -1) return false; // listener already exists.
-            return this.#removeWrappedListener(listener, options);
+            return this.#addWrappedListener(listener, listenerOptions);
         }
 
         /**
@@ -247,6 +235,18 @@
                 });
             };
             return wrapper;
+        }
+
+        /**
+         * Removes a listener for this event.
+         *
+         * @param {TurboEventCallback} listener - The callback function to remove.
+         * @param {TurboAddEventListenerOptions} [options] - The options provided when adding the listener.
+         * @return {boolean} Returns `true` if the listener was successfully removed, `false` otherwise.
+         */
+        removeListener(listener, options) {
+            if (listener === undefined || listener === null || typeof listener !== 'function') return false;
+            return this.#removeWrappedListener(listener, TurboListenerOptions.from(options));
         }
 
         #removeWrappedListener(listener, options) {
