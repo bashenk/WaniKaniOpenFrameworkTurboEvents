@@ -66,7 +66,7 @@ The `wkof.turbo` object has the following properties and methods
 
         - #### eventList(eventList, callback, options): `{name: string, added: boolean}[]`
 
-            - Each returned object's `name` is the name of the event and `added` indicates the result of the [add_event_listener](#add_event_listenereventname-listener-options-boolean) operation for that listener.
+            - Each returned object's `name` is the name of the event and `added` indicates the result of the [add\_event\_listener](#add_event_listenereventname-listener-options-boolean) operation for that listener.
 
         - #### targetIds(callback, targetIds, options): `boolean`
 
