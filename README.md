@@ -101,12 +101,12 @@ The `wkof.turbo` object has the following properties and methods
 
         - #### lessons\_picker(callback, options): `boolean`
 
-            - Callback is triggered whenever the user visits the "lessons" picker page and the page has fully loaded.
+            - Callback is triggered whenever the user visits the "lessons picker" page and the page has fully loaded.
             - Convenience function for [wkof.turbo.add\_typical\_page\_listener(callback, wkof.turbo.common.locations.lessons\_picker, options)](#add_typical_page_listenercallback-urls-options-boolean).
 
         - #### lessons\_quiz(callback, options): `boolean`
 
-            - Callback is triggered whenever the user begins the "lessons" quiz page and the page has fully loaded.
+            - Callback is triggered whenever the user begins the "lessons quiz" page and the page has fully loaded.
             - Convenience function for [wkof.turbo.add\_typical\_page\_listener(callback, wkof.turbo.common.locations.lessons\_quiz, options)](#add_typical_page_listenercallback-urls-options-boolean).
 
         - #### reviews(callback, options): `boolean`
