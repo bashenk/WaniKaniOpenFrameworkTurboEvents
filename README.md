@@ -49,7 +49,6 @@ The `wkof.turbo` object has the following properties and methods
 - #### add\_typical\_frame\_listener(callback, targetIds, options): `boolean`
 
     - Merges the provided `targetIds` into the `options` parameter.
-    - Under the hood, this also silently uses the "load" [special case](#special-cases) event to ensure that the callback is called at least once upon the first page load.
     - See: [wkof.turbo.add\_event\_listener(eventName, listener, options)](#add_event_listenereventname-listener-options-boolean).
 
 - #### remove\_event\_listener(eventName, listener, options): `boolean`
