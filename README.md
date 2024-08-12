@@ -454,16 +454,25 @@ function myFunction(event, url) {
 }
 
 function configurePageHandler() {
+    // Do not show warnings about adding listeners after the page has loaded.
+    wkof.turbo.silenceWarnings = true;
     // Run the callback on "turbo:click" on any page.
-    wkof.turbo.on.event.click(myFunction);
+    wkof.turbo.events.click.addListener(myFunction);
 
     const options1 = {
         // Run the callback on the dashboard and on individual radical, kanji, or vocab pages.
         urls: [wkof.turbo.common.locations.dashboard, wkof.turbo.common.locations.items_pages]
     };
-    // Run the callback on the "turbo:before-render" event.
-    wkof.turbo.events.before_render.addListener(myFunction, options1);
+    // Run the callback on the "turbo:before-visit" event.
+    wkof.turbo.add_event_listener(wkof.turbo.events.before_visit, myFunction, options1);
+    // The above line is equivalent to either of the following two lines.
+    // These will both return false because the listener has already been added with these options. 
+    wkof.turbo.events.before_visit.addListener(myFunction, options1);
+    wkof.turbo.events["turbo:before-visit"].addListener(myFunction, options1);
 
+    // Add a listener with the same options to the "turbo:visit" event.
+    wkof.turbo.events.visit.addListener(myFunction, options1);
+    
     // Run the callback on initial page load, turbo:before-render, and turbo:frame_render.
     // See the special case note about "load" in the preceding section.
     let eventList = ['load', wkof.turbo.events.before_render, wkof.turbo.events.frame_render];
@@ -471,28 +480,6 @@ function configurePageHandler() {
         // Run the callback on the lessons picker page.
         urls: wkof.turbo.common.locations.lessons_picker,
         // Automatically remove the event after firing once
-        once: true
-    };
-    // The first parameter can be an array including either the Turbo event object that is provided
-    // (wkof.turbo.events.before_render) or the string itself ("turbo:before-render").
-    // Note that two new listeners are added in this example, one for each **Turbo** event.
-    wkof.turbo.on.common.eventList(eventList, myFunction, options2);
-
-    // Remove listeners by using `wkof.turbo.remove_event_listener(eventName, listener, options)`.
-    // In this scenario, the result would presumably be [false, true, true], since the "load" event
-    // does not create a listener. However, if a "turbo:before-render" or "turbo:frame-render"
-    // event has fired between creating the listener and making the following call, the respective
-    // loop condition or conditions would also return false because the listener or listeners would
-    // have already been removed due to using the `once: true` option during creation.
-    eventList.forEach(eventName => {
-        // The callback and options must both match the existing listener or the removal will fail. 
-        // Callback must be reference equal, but the options can just have equivalent values.
-        let equivalentOptions = {urls: wkof.turbo.common.locations.lessons_picker, once: true};
-        wkof.turbo.remove_event_listener(eventName, myFunction, equivalentOptions);
-    });
-
-    const options3 = {
-        // Automatically remove the event after firing once.
         once: true,
         // Ignore events for Turbo's cached version of pages.
         nocache: true,
@@ -500,17 +487,71 @@ function configurePageHandler() {
         // has finished firing, which is done essentially via `setTimeout(callback, 0)`.
         noTimeout: true
     };
-    // The `urls` option is not set, so this will run on the `visit` event for every page.
-    // However, since `once: true` is set, it will be removed after first execution.
-    wkof.turbo.add_event_listener(wkof.turbo.events.visit, myFunction, options3);
-    // Or, it can be removed immediately.
-    wkof.turbo.remove_event_listener(wkof.turbo.events.visit, myFunction, options3);
+    // The first parameter can be an array including either the Turbo event object that is provided
+    // (wkof.turbo.events.before_render) or the string itself ("turbo:before-render").
+    // Note that two new listeners are added in this example, one for each **Turbo** event.
+    wkof.turbo.on.common.eventList(eventList, myFunction, options2);
+    // returned array is [
+    //     {name: "load", added: false},
+    //     {name: "turbo:before-render", added: true},
+    //     {name: "turbo:frame-render", added: true}
+    // ]
 
-    // Listener is still active from the `wkof.turbo.on.event.click(myFunction)` invocation.
+    // Remove a single listener by using
+    // `wkof.turbo.remove_event_listener(eventName, listener, options)`.
+    // In this scenario, the result would be [false, true, true], since the "load" event does not
+    // create a listener. However, if a "turbo:before-render" or "turbo:frame-render" event has
+    // fired between creating the listener and making the following call, the respective loop
+    // condition or conditions would also return false because the listener or listeners would
+    // have already been removed due to using the `once: true` option during creation.
+    eventList.map(eventName => {
+        // The callback and options must both match the existing listener or the removal will fail. 
+        // Callback must be reference equal, but the options can just have equivalent values.
+        let equivalentOptions = {urls: wkof.turbo.common.locations.lessons_picker, once: true};
+        return wkof.turbo.remove_event_listener(eventName, myFunction, equivalentOptions);
+        // this could alternatively be done in the following way:
+        return wkof.turbo.events[eventName].removeListener(myFunction, equivalentOptions);
+    });
+
+    // Listeners still active: "turbo:click", "turbo:before-visit", and "turbo:visit" 
+    // The `remove_event_listeners` can remove multiple at once, however the options must all match.
+    eventList = ["turbo:click", "turbo:before-visit", "turbo:visit"];
+    wkof.turbo.remove_event_listeners(eventList, myFunction, options1);
+    // returned array is [
+    //     {"name": "turbo:click", "removed": false},
+    //     {"name": "turbo:before-visit", "removed": true},
+    //     {"name": "turbo:visit", "removed": true}
+    // ]
+    // "turbo:click" was not removed because the options did not match. The following will work:
+    wkof.turbo.events.click.removeListener(myFunction);
 
     // Add a listener for all turbo events on any URL.
     // `Object.entries(wkof.turbo.events)` or `Object.values(wkof.turbo.events)` function the same.
     eventList = wkof.turbo.events;
-    wkof.turbo.on.common.events(eventList, myFunction);
+    wkof.turbo.on.common.eventList(eventList, myFunction);
+    // returned array is [
+    //     {"name": "turbo:click", "added": true},
+    //     {"name": "turbo:before-visit", "added": true},
+    //     {"name": "turbo:visit", "added": true},
+    //     {"name": "turbo:before-cache", "added": true},
+    //     {"name": "turbo:before-render", "added": true},
+    //     {"name": "turbo:render", "added": true},
+    //     {"name": "turbo:load", "added": true},
+    //     {"name": "turbo:morph", "added": true},
+    //     {"name": "turbo:before-morph-element", "added": true},
+    //     {"name": "turbo:before-morph-attribute", "added": true},
+    //     {"name": "turbo:morph-element", "added": true},
+    //     {"name": "turbo:submit-start", "added": true},
+    //     {"name": "turbo:submit-end", "added": true},
+    //     {"name": "turbo:before-frame-render", "added": true},
+    //     {"name": "turbo:frame-render", "added": true},
+    //     {"name": "turbo:frame-load", "added": true},
+    //     {"name": "turbo:frame-missing", "added": true},
+    //     {"name": "turbo:before-stream-render", "added": true},
+    //     {"name": "turbo:before-fetch-request", "added": true},
+    //     {"name": "turbo:before-fetch-response", "added": true},
+    //     {"name": "turbo:before-prefetch", "added": true},
+    //     {"name": "turbo:fetch-request-error", "added": true}
+    // ]
 }
 ```
