@@ -374,6 +374,11 @@
         /** @see addTypicalPageListener */ lessons_quiz: {value: (callback, options) => addTypicalPageListener(callback, common.locations.lessons_quiz, options), enumerable: true},
         /** @see addTypicalPageListener */ reviews: {value: (callback, options) => addTypicalPageListener(callback, common.locations.reviews, options), enumerable: true},
     });
+    /** Container for various event listeners. */
+    const eventMap = {}; Object.defineProperties(eventMap, {
+        common: {value: commonListeners},
+        event: {value: turboListeners},
+    });
     /** The object to be published onto the `wkof.turbo` object. */
     const publishedInterface = {}; Object.defineProperties(publishedInterface, {
         add_event_listener: {value: addEventListener, enumerable: true},
@@ -383,11 +388,7 @@
         remove_event_listener: {value: removeEventListener, enumerable: true},
         remove_event_listeners: {value: removeMultipleEventListeners, enumerable: true},
         /** Container for various event listeners. */
-        on: {value: Object.defineProperties({}, {
-                common: {value: commonListeners, enumerable: true},
-                event: {value: turboListeners, enumerable: true},
-            }), enumerable: true,
-        },
+        on: {value: eventMap, enumerable: true},
         events: {value: turboEvents, enumerable: true},
         common: {value: common, enumerable: true},
 
