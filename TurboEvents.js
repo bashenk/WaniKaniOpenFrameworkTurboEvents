@@ -380,6 +380,7 @@
         add_typical_page_listener: {value: addTypicalPageListener, enumerable: true},
         add_typical_frame_listener: {value: addTypicalFrameListener, enumerable: true},
         remove_event_listener: {value: removeEventListener, enumerable: true},
+        remove_event_listeners: {value: removeMultipleEventListeners, enumerable: true},
         /** Container for various event listeners. */
         on: {value: Object.defineProperties({}, {
                 common: {value: commonListeners, enumerable: true},
@@ -425,7 +426,7 @@
     }
 
     /**
-     * Adds multiple event listeners to the specified event list.
+     * Adds multiple event listeners according to the specified event list.
      *
      * @param {(string|object|Array<string|object>|Set<string|object>)} eventList - The event list to add listeners to. If it is an object, it is assumed to be the `turboEvents` object. If it is an array, each element is treated as a string containing the event name or an object containing the event name as the property `name`.
      * @param {TurboEventCallback} listener - The callback function to be invoked when the event is triggered.
@@ -486,6 +487,24 @@
         eventName = normalizeEventName(eventName);
         if (!(eventName in turboEvents)) return false;
         return turboEvents[eventName].removeListener(listener, options);
+    }
+
+    /**
+     * Removes multiple event listeners according to the specified event list.
+     *
+     * @param {(string|object|Array<string|object>|Set<string|object>)} eventList - The event list to add listeners to. If it is an object, it is assumed to be the `turboEvents` object. If it is an array, each element is treated as a string containing the event name or an object containing the event name as the property `name`.
+     * @param {TurboEventCallback} listener - The callback function to be invoked when the event is triggered.
+     * @param {TurboAddEventListenerOptions} [options] - The options for the event listener.
+     * @return {({name: string, removed: boolean}[])} An array of objects `{name: string, added: boolean}` containing the added event names and whether the listener was successfully added.
+     */
+    function removeMultipleEventListeners(eventList, listener, options) {
+        if (eventList === turboEvents) eventList = Object.values(eventList);
+        if (eventList instanceof Set) eventList = Array.from(eventList.values());
+        if (!Array.isArray(eventList)) eventList = [eventList];
+        return eventList.map(eventName => {
+            const name = normalizeEventName(eventName), removed = removeEventListener(name, listener, options);
+            return {name, removed};
+        });
     }
 
     /* === Helper Functions === */
