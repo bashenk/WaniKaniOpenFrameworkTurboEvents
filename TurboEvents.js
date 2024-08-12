@@ -2,7 +2,7 @@
 // @name        Wanikani Open Framework Turbo Events
 // @namespace   https://greasyfork.org/en/users/11878
 // @description Adds helpful methods for dealing with Turbo Events to WaniKani Open Framework
-// @version     4.1.0
+// @version     4.1.1
 // @match       https://www.wanikani.com/*
 // @match       https://preview.wanikani.com/*
 // @author      Inserio
@@ -26,7 +26,7 @@
 (function() {
     'use strict';
 
-    const version = '4.1.0', internalHandlers = {};
+    const version = '4.1.1', internalHandlers = {};
 
     /* === JSDoc Definitions === */
 
@@ -377,6 +377,7 @@
     /** The object to be published onto the `wkof.turbo` object. */
     const publishedInterface = {}; Object.defineProperties(publishedInterface, {
         add_event_listener: {value: addEventListener, enumerable: true},
+        add_event_listeners: {value: addMultipleEventListeners, enumerable: true},
         add_typical_page_listener: {value: addTypicalPageListener, enumerable: true},
         add_typical_frame_listener: {value: addTypicalFrameListener, enumerable: true},
         remove_event_listener: {value: removeEventListener, enumerable: true},

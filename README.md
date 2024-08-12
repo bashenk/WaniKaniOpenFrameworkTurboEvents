@@ -36,17 +36,21 @@ The `wkof.turbo` object has the following properties and methods
     - Returns `true` when the listener was successfully added or `false` when the inputs were invalid or the provided listener and options already exists.
         - Note that in the "load" [special case (explained below)](#special-cases), a listener is not added, and this instead returns `true` or `false` according to whether the callback was called immediately.
 
+- #### add\_event\_listeners(eventList, listener, options): `{name: string, added: boolean}[]`
+
+    - Each returned object's `name` is the name of the event and `added` indicates the result of the [wkof.turbo.add\_event\_listener(name, listener, options)](#add_event_listenereventname-listener-options-boolean) operation for that listener.
+
 - #### add\_typical\_page\_listener(callback, urls, options): `boolean`
 
     - Merges the provided `urls` into the `options` parameter.
     - Under the hood, this also silently uses the "load" [special case](#special-cases) event to ensure that the callback is called at least once upon the first page load.
-    - See: [add\_event\_listener(eventName, listener, options)](#add_event_listenereventname-listener-options-boolean).
+    - See: [wkof.turbo.add\_event\_listener(eventName, listener, options)](#add_event_listenereventname-listener-options-boolean).
 
 - #### add\_typical\_frame\_listener(callback, targetIds, options): `boolean`
 
     - Merges the provided `targetIds` into the `options` parameter.
     - Under the hood, this also silently uses the "load" [special case](#special-cases) event to ensure that the callback is called at least once upon the first page load.
-    - See: [add\_event\_listener(eventName, listener, options)](#add_event_listenereventname-listener-options-boolean).
+    - See: [wkof.turbo.add\_event\_listener(eventName, listener, options)](#add_event_listenereventname-listener-options-boolean).
 
 - #### remove\_event\_listener(eventName, listener, options): `boolean`
 
@@ -54,7 +58,7 @@ The `wkof.turbo` object has the following properties and methods
 
 - #### remove\_event\_listeners(eventList, listener, options): `{name: string, removed: boolean}[]`
 
-    - Each returned object's `name` is the name of the event and `removed` indicates the result of the [remove\_event\_listener](#remove_event_listenereventName-listener-options-boolean) operation for that listener.
+    - Each returned object's `name` is the name of the event and `removed` indicates the result of the [wkof.turbo.remove\_event\_listener(name, listener, options)](#remove_event_listenereventName-listener-options-boolean) operation for that listener.
 
 - #### on: `object`
 
@@ -62,36 +66,38 @@ The `wkof.turbo` object has the following properties and methods
 
         - Contains non-writable convenience functions for common use cases.
         - Note that the object itself is extensible, so additional functions may be added if desired.
-        - ~~`events(eventList, callback, options)`~~ Deprecated. Use [eventList(eventList, callback, options)](#eventlisteventlist-callback-options-name-string-added-boolean).
+        - #### ~~events(eventList, callback, options)~~
+ 
+            - Deprecated. Use [wkof.turbo.add\_event\_listeners(eventList, listener, options)](#add_event_listenerseventList-listener-options-name-string-added-boolean).
 
-        - #### eventList(eventList, callback, options): `{name: string, added: boolean}[]`
+        - #### ~~eventList(eventList, callback, options): `{name: string, added: boolean}[]`~~
 
-            - Each returned object's `name` is the name of the event and `added` indicates the result of the [add\_event\_listener](#add_event_listenereventname-listener-options-boolean) operation for that listener.
+            - Deprecated. Use [wkof.turbo.add\_event\_listeners(eventList, listener, options)](#add_event_listenerseventList-listener-options-name-string-added-boolean).
 
         - #### targetIds(callback, targetIds, options): `boolean`
 
             - Callback is triggered whenever a frame is loaded with an element `id` that matches one of the provided `targetIds`.
-            - Convenience function for [add\_typical\_frame\_listener(callback, targetIds, options)](#add_typical_frame_listenercallback-targetids-options-boolean).
+            - Convenience function for [wkof.turbo.add\_typical\_frame\_listener(callback, targetIds, options)](#add_typical_frame_listenercallback-targetids-options-boolean).
 
         - #### urls(callback, urls, options): `boolean`
 
             - Callback is triggered whenever the user visits any of the URLs provided and the page has fully loaded.
-            - Convenience function for [add\_typical\_page\_listener(callback, urls, options)](#add_typical_page_listenercallback-urls-options-boolean).
+            - Convenience function for [wkof.turbo.add\_typical\_page\_listener(callback, urls, options)](#add_typical_page_listenercallback-urls-options-boolean).
 
         - #### dashboard(callback, options): `boolean`
 
             - Callback is triggered whenever the user visits the "dashboard" and the page has fully loaded.
-            - Convenience function for [add\_typical\_page\_listener(callback, wkof.turbo.common.locations.dashboard, options)](#add_typical_page_listenercallback-urls-options-boolean).
+            - Convenience function for [wkof.turbo.add\_typical\_page\_listener(callback, wkof.turbo.common.locations.dashboard, options)](#add_typical_page_listenercallback-urls-options-boolean).
 
         - #### items\_pages(callback, options): `boolean`
 
             - Callback is triggered whenever the user visits the page for any of the specific items (radical, kanji, vocab) and the page has fully loaded.
-            - Convenience function for [add\_typical\_page\_listener(callback, wkof.turbo.common.locations.items\_pages, options)](#add_typical_page_listenercallback-urls-options-boolean).
+            - Convenience function for [wkof.turbo.add\_typical\_page\_listener(callback, wkof.turbo.common.locations.items\_pages, options)](#add_typical_page_listenercallback-urls-options-boolean).
 
         - #### lessons(callback, options): `boolean`
 
             - Callback is triggered whenever the user visits the "lessons" page and the page has fully loaded.
-            - Convenience function for [add\_typical\_page\_listener(callback, wkof.turbo.common.locations.lessons, options)](#add_typical_page_listenercallback-urls-options-boolean).
+            - Convenience function for [wkof.turbo.add\_typical\_page\_listener(callback, wkof.turbo.common.locations.lessons, options)](#add_typical_page_listenercallback-urls-options-boolean).
 
         - #### lessons\_picker(callback, options): `boolean`
 
@@ -101,16 +107,16 @@ The `wkof.turbo` object has the following properties and methods
         - #### lessons\_quiz(callback, options): `boolean`
 
             - Callback is triggered whenever the user begins the "lessons" quiz page and the page has fully loaded.
-            - Convenience function for [add\_typical\_page\_listener(callback, wkof.turbo.common.locations.lessons\_quiz, options)](#add_typical_page_listenercallback-urls-options-boolean).
+            - Convenience function for [wkof.turbo.add\_typical\_page\_listener(callback, wkof.turbo.common.locations.lessons\_quiz, options)](#add_typical_page_listenercallback-urls-options-boolean).
 
         - #### reviews(callback, options): `boolean`
 
             - Callback is triggered whenever the user visits the "reviews" page and the page has fully loaded.
-            - Convenience function for [add\_typical\_page\_listener(callback, wkof.turbo.common.locations.reviews, options)](#add_typical_page_listenercallback-urls-options-boolean).
+            - Convenience function for [wkof.turbo.add\_typical\_page\_listener(callback, wkof.turbo.common.locations.reviews, options)](#add_typical_page_listenercallback-urls-options-boolean).
 
     - #### ~~event~~: `object`
 
-        - Deprecated. Use the `addListener` method in the [events](#events-object) object.
+        - Deprecated. Use the `addListener` method in the [wkof.turbo.events](#events-object) object.
         - ~~Contains functions to set listeners for each of the Turbo events. For the return values, see `add_event_listener(eventName, listener, options)`~~
         - ~~`before_cache(callback, options)`~~
         - ~~`before_fetch_request(callback, options)`~~
