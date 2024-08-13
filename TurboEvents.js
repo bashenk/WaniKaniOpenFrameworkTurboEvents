@@ -17,12 +17,6 @@
 /* jshint esversion: 11 */
 // noinspection JSUnusedGlobalSymbols
 
-/**
- * The built-in object that specifies characteristics about the event listener.
- * @external AddEventListenerOptions
- * @see https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener#options
- */
-
 (function() {
     'use strict';
 
@@ -259,6 +253,8 @@
         }
     }
 
+    /* === WKOF Properties === */
+
     // noinspection JSUnresolvedReference
     const urlHandlers = {
         detailFetchResponseResponseUrl: event => event.detail.fetchResponse.response.url,
@@ -267,8 +263,6 @@
         detailResponseUrl: event => event.detail.response.url, detailUrl: event => event.detail.url, detailUrlHref: event => event.detail.url.href,
         targetBaseURI: event => event.target.baseURI, targetHref: event => event.target.href,
     };
-
-    /* === WKOF Properties === */
 
     /**
      * Container for all the Turbo events.
