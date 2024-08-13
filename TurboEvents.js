@@ -61,7 +61,7 @@
          * @type {boolean} */ nocache;
         /** Indicates whether the listener should skip use of {@link setTimeout}(callback,0), typically used to let the event settle before invoking the callback. If not specified, defaults to `false`.
          * @type {boolean} */ noTimeout;
-        /** The target IDs to be verified against the event target ID. If not specified, no targetIds are associated with the listener. The input is coerced into an object with each key being the input `string` and the value being `true`.
+        /** The target IDs to be verified against the event target ID. If not specified, the listener runs for any event target. The input is coerced into an object with each key being the input `string` and the value being `true`.
          * @type {Object.<string,boolean>} */ targetIds;
         /** The URLs to be verified against the URL parameter. If not specified, the listener runs on any URL. The input is coerced into an array of {@link RegExp} objects.
          * @type {RegExp[]} */ urls;

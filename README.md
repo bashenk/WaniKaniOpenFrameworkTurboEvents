@@ -512,9 +512,10 @@ function configurePageHandler() {
     // condition or conditions would also return false because the listener or listeners would
     // have already been removed due to using the `once: true` option during creation.
     eventList.map(eventName => {
-        // The callback and options must both match the existing listener or the removal will fail. 
-        // Callback must be reference equal, but the options can just have equivalent values.
-        let equivalentOptions = {urls: wkof.turbo.common.locations.lessons_picker, once: true};
+        // The listener and options must both match the existing listener or the removal will fail. 
+        // The listener must be reference equal, but the options can just have equivalent values.
+        let equivalentOptions = {urls: wkof.turbo.common.locations.lessons_picker,
+            once: true, nocache: true, noTimeout: true};
         return wkof.turbo.remove_event_listener(eventName, myFunction, equivalentOptions);
         // this could alternatively be done in the following way:
         return wkof.turbo.events[eventName].removeListener(myFunction, equivalentOptions);
