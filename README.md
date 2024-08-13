@@ -439,7 +439,7 @@ function configureTurbo() {
     const eventList = ['load', wkof.turbo.events.load];
 
     // Setup the listener
-    wkof.turbo.on.common.eventList(eventList, main, options);
+    wkof.turbo.add_event_listeners(eventList, main, options);
 }
 
 function main() {
@@ -497,7 +497,7 @@ function configurePageHandler() {
     // The first parameter can be an array including either the Turbo event object that is provided
     // (wkof.turbo.events.before_render) or the string itself ("turbo:before-render").
     // Note that two new listeners are added in this example, one for each **Turbo** event.
-    wkof.turbo.on.common.eventList(eventList, myFunction, options2);
+    wkof.turbo.add_event_listeners(eventList, myFunction, options2);
     // returned array is [
     //     {name: "load", added: false},
     //     {name: "turbo:before-render", added: true},
@@ -536,7 +536,7 @@ function configurePageHandler() {
     // Add a listener for all turbo events on any URL.
     // `Object.entries(wkof.turbo.events)` or `Object.values(wkof.turbo.events)` function the same.
     eventList = wkof.turbo.events;
-    wkof.turbo.on.common.eventList(eventList, myFunction);
+    wkof.turbo.add_event_listeners(eventList, myFunction);
     // returned array is [
     //     {"name": "turbo:click", "added": true},
     //     {"name": "turbo:before-visit", "added": true},
