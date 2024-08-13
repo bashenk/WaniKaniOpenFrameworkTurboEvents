@@ -34,7 +34,7 @@
 
     /**
      * Cannot use @interface because then simple subtyping does not work, and @record is apparently not supported, though that would probably solve it.
-     * @typedef {{capture?: boolean, once?: boolean, passive?: boolean, signal?: AbortSignal, nocache?: boolean, noTimeout?: boolean, targetIds?: (string|string[]|Set<string>|Object.<string,boolean>), urls?: (string|RegExp|(string|RegExp)[]|Set<string|RegExp>), useDocumentIds?: boolean}} TurboAddEventListenerOptions
+     * @typedef {{capture?: boolean, once?: boolean, passive?: boolean, signal?: AbortSignal, nocache?: boolean, noTimeout?: boolean, targetIds?: (string|string[]|Set<string>|Object.<string,*>), urls?: (string|RegExp|(string|RegExp)[]|Set<string|RegExp>), useDocumentIds?: boolean}} TurboAddEventListenerOptions
      * @augments AddEventListenerOptions
      * @augments EventListenerOptions
      * @see https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener#options
