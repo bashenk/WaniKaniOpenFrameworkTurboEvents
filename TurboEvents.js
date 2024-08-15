@@ -34,7 +34,7 @@
 
     /**
      * Cannot use @interface because then simple subtyping does not work, and @record is apparently not supported, though that would probably solve it.
-     * @typedef {{capture?: boolean, once?: boolean, passive?: boolean, signal?: AbortSignal, nocache?: boolean, noTimeout?: boolean, targetIds?: (string|string[]|Set<string>|Object.<string,*>), urls?: (string|RegExp|(string|RegExp)[]|Set<string|RegExp>), useDocumentIds?: boolean}} TurboAddEventListenerOptions
+     * @typedef {{capture?: boolean, once?: boolean, passive?: boolean, signal?: AbortSignal, nocache?: boolean, timeout?: keyof {'none','promise','setTimeout'}, targetIds?: (string|string[]|Set<string>|Object.<string,*>), urlHandler?: ((url: URL) => boolean), urls?: (string|RegExp|(string|RegExp)[]|Set<string|RegExp>), useDocumentIds?: boolean}} TurboAddEventListenerOptions
      * @augments AddEventListenerOptions
      * @augments EventListenerOptions
      * @see https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener#options
@@ -42,6 +42,7 @@
 
     /* === Classes === */
 
+    // noinspection JSUnresolvedReference
     /**
      * @class TurboListenerOptions
      * @implements TurboAddEventListenerOptions
@@ -59,8 +60,8 @@
          * @type {AbortSignal} */ signal;
         /** Indicates whether to ignore events involving Turbo's cached pages. See {@link https://discuss.hotwired.dev/t/before-cache-render-event/4928/4}. If not specified, defaults to `false`.
          * @type {boolean} */ nocache;
-        /** Indicates whether the listener should skip use of {@link setTimeout}(callback,0), typically used to let the event settle before invoking the callback. If not specified, defaults to `false`.
-         * @type {boolean} */ noTimeout;
+        /** Indicates whether the listener should use {@link Promise.resolve()}.then(callback), {@link setTimeout}(callback,0), or call the callback immediately. These are typically used to let the event settle before invoking the callback. If not specified, defaults to `promise`.
+         * @type {keyof {'none','promise','setTimeout'}} */ timeout;
         /** The target IDs to be verified against the event target ID. If not specified, the listener runs for any event target. The input is coerced into an object with each key being the input `string` and the value being `true`.
          * @type {Object.<string,boolean>} */ targetIds;
         /** The URLs to be verified against the URL parameter. If not specified, the listener runs on any URL. The input is coerced into an array of {@link RegExp} objects.
@@ -86,6 +87,7 @@
             if (options?.signal instanceof AbortSignal) this.signal = options.signal;
             if (typeof options?.useDocumentIds === 'boolean') this.useDocumentIds = options.useDocumentIds;
             if (typeof options?.noTimeout === 'boolean') this.noTimeout = options.noTimeout;
+            if (typeof options?.timeout === 'string' && (options.timeout === 'promise' || options.timeout === 'setTimeout' || options.timeout === 'none')) this.timeout = options.timeout; else if (options?.noTimeout === true) this.timeout = 'none';
             if (typeof options?.nocache === 'boolean') this.nocache = options.nocache;
             if (options?.targetIds != null) this.targetIds = Object.freeze(normalizeIdsToFlags(options.targetIds));
             if (options?.urls != null) this.urls = Object.freeze(normalizeToRegExpArray(options.urls));
@@ -129,7 +131,7 @@
                 && this.passive === other.passive
                 && this.signal === other.signal
                 && this.useDocumentIds === other.useDocumentIds
-                && this.noTimeout === other.noTimeout
+                && this.timeout === other.timeout
                 && this.nocache === other.nocache
                 && (this.targetIds === other.targetIds || deepEqual(this.targetIds, other.targetIds))
                 && (this.urls === other.urls || deepEqual(this.urls, other.urls)));
@@ -224,8 +226,18 @@
                     return Promise.resolve();
                 }
                 return new Promise(resolve => {
-                    if (options.noTimeout) resolve(listener(event, url));
-                    else setTimeout(() => resolve(listener(event, url)), 0);
+                    switch (options.timeout) {
+                        case 'none':
+                            resolve(listener(event, url));
+                            break;
+                        case 'setTimeout':
+                            setTimeout(() => resolve(listener(event, url)), 0);
+                            break;
+                        case 'promise':
+                        default:
+                            Promise.resolve().then(() => resolve(listener(event, url)));
+                            break;
+                    }
                 });
             };
             return wrapper;
