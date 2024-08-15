@@ -149,133 +149,155 @@ The `wkof.turbo` object has the following properties and methods
 
         - `source`: "document"
         - `name`: "turbo:click"
-        - `addListener(callback, options)`: `boolean`
+        - **addListener(callback, options)**: `boolean`
+        - **removeListener(callback, options)**: `boolean`
 
     - #### before\_visit: `object`
 
         - `source`: "document"
         - `name`: "turbo:before-visit"
-        - `addListener(callback, options)`: `boolean`
+        - **addListener(callback, options)**: `boolean`
+        - **removeListener(callback, options)**: `boolean`
 
     - #### visit: `object`
 
         - `source`: "document"
         - `name`: "turbo:visit"
-        - `addListener(callback, options)`: `boolean`
+        - **addListener(callback, options)**: `boolean`
+        - **removeListener(callback, options)**: `boolean`
 
     - #### before\_cache: `object`
 
         - `source`: "document"
         - `name`: "turbo:before-cache"
-        - `addListener(callback, options)`: `boolean`
+        - **addListener(callback, options)**: `boolean`
+        - **removeListener(callback, options)**: `boolean`
 
     - #### before\_render: `object`
 
         - `source`: "document"
         - `name`: "turbo:before-render"
-        - `addListener(callback, options)`: `boolean`
+        - **addListener(callback, options)**: `boolean`
+        - **removeListener(callback, options)**: `boolean`
 
     - #### render: `object`
 
         - `source`: "document"
         - `name`: "turbo:render"
-        - `addListener(callback, options)`: `boolean`
+        - **addListener(callback, options)**: `boolean`
+        - **removeListener(callback, options)**: `boolean`
 
     - #### load: `object`
 
         - `source`: "document"
         - `name`: "turbo:load"
-        - `addListener(callback, options)`: `boolean`
+        - **addListener(callback, options)**: `boolean`
+        - **removeListener(callback, options)**: `boolean`
 
     - #### morph: `object`
 
         - `source`: "pageRefresh"
         - `name`: "turbo:morph"
-        - `addListener(callback, options)`: `boolean`
+        - **addListener(callback, options)**: `boolean`
+        - **removeListener(callback, options)**: `boolean`
 
     - #### before\_morph\_element: `object`
 
         - `source`: "pageRefresh"
         - `name`: "turbo:before-morph-element"
-        - `addListener(callback, options)`: `boolean`
+        - **addListener(callback, options)**: `boolean`
+        - **removeListener(callback, options)**: `boolean`
 
     - #### before\_morph\_attribute: `object`
 
         - `source`: "pageRefresh"
         - `name`: "turbo:before-morph-attribute"
-        - `addListener(callback, options)`: `boolean`
+        - **addListener(callback, options)**: `boolean`
+        - **removeListener(callback, options)**: `boolean`
 
     - #### morph\_element: `object`
 
         - `source`: "pageRefresh"
         - `name`: "turbo:morph-element"
-        - `addListener(callback, options)`: `boolean`
+        - **addListener(callback, options)**: `boolean`
+        - **removeListener(callback, options)**: `boolean`
 
     - #### submit\_start: `object`
 
         - `source`: "forms"
         - `name`: "turbo:submit-start"
-        - `addListener(callback, options)`: `boolean`
+        - **addListener(callback, options)**: `boolean`
+        - **removeListener(callback, options)**: `boolean`
 
     - #### submit\_end: `object`
 
         - `source`: "forms"
         - `name`: "turbo:submit-end"
-        - `addListener(callback, options)`: `boolean`
+        - **addListener(callback, options)**: `boolean`
+        - **removeListener(callback, options)**: `boolean`
 
     - #### before\_frame\_render: `object`
 
         - `source`: "frames"
         - `name`: "turbo:before-frame-render"
-        - `addListener(callback, options)`: `boolean`
+        - **addListener(callback, options)**: `boolean`
+        - **removeListener(callback, options)**: `boolean`
 
     - #### frame\_render: `object`
 
         - `source`: "frames"
         - `name`: "turbo:frame-render"
-        - `addListener(callback, options)`: `boolean`
+        - **addListener(callback, options)**: `boolean`
+        - **removeListener(callback, options)**: `boolean`
 
     - #### frame\_load: `object`
 
         - `source`: "frames"
         - `name`: "turbo:frame-load"
-        - `addListener(callback, options)`: `boolean`
+        - **addListener(callback, options)**: `boolean`
+        - **removeListener(callback, options)**: `boolean`
 
     - #### frame\_missing: `object`
 
         - `source`: "frames"
         - `name`: "turbo:frame-missing"
-        - `addListener(callback, options)`: `boolean`
+        - **addListener(callback, options)**: `boolean`
+        - **removeListener(callback, options)**: `boolean`
 
     - #### before\_stream\_render: `object`
 
         - `source`: "streams"
         - `name`: "turbo:before-stream-render"
-        - `addListener(callback, options)`: `boolean`
+        - **addListener(callback, options)**: `boolean`
+        - **removeListener(callback, options)**: `boolean`
 
     - #### before\_fetch\_request: `object`
 
         - `source`: "httpRequests"
         - `name`: "turbo:before-fetch-request"
-        - `addListener(callback, options)`: `boolean`
+        - **addListener(callback, options)**: `boolean`
+        - **removeListener(callback, options)**: `boolean`
 
     - #### before\_fetch\_response: `object`
 
         - `source`: "httpRequests"
         - `name`: "turbo:before-fetch-response"
-        - `addListener(callback, options)`: `boolean`
+        - **addListener(callback, options)**: `boolean`
+        - **removeListener(callback, options)**: `boolean`
 
     - #### before\_prefetch: `object`
 
         - `source`: "httpRequests"
         - `name`: "turbo:before-prefetch"
-        - `addListener(callback, options)`: `boolean`
+        - **addListener(callback, options)**: `boolean`
+        - **removeListener(callback, options)**: `boolean`
 
     - #### fetch\_request\_error: `object`
 
         - `source`: "httpRequests"
         - `name`: "turbo:fetch-request-error"
-        - `addListener(callback, options)`: `boolean`
+        - **addListener(callback, options)**: `boolean`
+        - **removeListener(callback, options)**: `boolean`
 
 - #### common: `object`
 
