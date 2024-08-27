@@ -2,7 +2,7 @@
 // @name        Wanikani Open Framework Turbo Events
 // @namespace   https://greasyfork.org/en/users/11878
 // @description Adds helpful methods for dealing with Turbo Events to WaniKani Open Framework
-// @version     4.2.0
+// @version     4.2.1
 // @match       https://www.wanikani.com/*
 // @match       https://preview.wanikani.com/*
 // @author      Inserio
@@ -20,12 +20,12 @@
 (function() {
     'use strict';
 
-    const version = '4.2.0', internalHandlers = {};
+    const version = '4.2.1', internalHandlers = {};
 
     /* === JSDoc Definitions === */
 
     /**
-     * The callback that handles the response
+     * The callback that handles the event
      * @callback TurboEventCallback
      * @augments EventListener
      * @param {CustomEvent} event - The Turbo event object.
@@ -33,8 +33,15 @@
      */
 
     /**
+     * The handler used to verify a URL.
+     * @callback URLHandler
+     * @param {URL} url
+     * @returns {boolean}
+     */
+
+    /**
      * Cannot use @interface because then simple subtyping does not work, and @record is apparently not supported, though that would probably solve it.
-     * @typedef {{capture?: boolean, once?: boolean, passive?: boolean, signal?: AbortSignal, nocache?: boolean, noWarn?: boolean, timeout?: keyof{'none','promise','setTimeout','both'}, targetIds?: (string|string[]|Set<string>|Object.<string,*>), urls?: (string|RegExp|(string|RegExp)[]|Set<string|RegExp>), useDocumentIds?: boolean}} TurboAddEventListenerOptions
+     * @typedef {{capture?: boolean, once?: boolean, passive?: boolean, signal?: AbortSignal, nocache?: boolean, noWarn?: boolean, timeout?: keyof{'none','promise','setTimeout','both'}, targetIds?: (string|string[]|Set<string>|Object.<string,*>), urlHandler?: URLHandler, urls?: (string|RegExp|(string|RegExp)[]|Set<string|RegExp>), useDocumentIds?: boolean}} TurboAddEventListenerOptions
      * @name TurboAddEventListenerOptions
      * @augments AddEventListenerOptions
      * @augments EventListenerOptions
@@ -73,8 +80,8 @@
          * @type {keyof{'none','promise','setTimeout','both'}} */ timeout;
         /** The target IDs to be verified against the event target ID. If not specified, the listener runs for any event target. The input is coerced into an object with each key being the input `string` and the value being `true`.
          * @type {Object.<string,boolean>} */ targetIds;
-        /** The URLs to be verified against the URL parameter. If not specified, the listener runs on any URL. The input is coerced into an array of {@link RegExp} objects.
-         * @type {RegExp[]} */ urls;
+        /** The handler to use to verify whether the url passes and the listener should be called. If provided, the [urls]{@link TurboAddEventListenerOptions#urls} parameter is ignored.
+         * @type {URLHandler} */ urlHandler;
         /** Indicates whether to check the IDs of the document element in addition to the event target for the {@link targetIds}. If not specified, defaults to `false`.
          * @type {boolean} */ useDocumentIds;
 
@@ -93,7 +100,7 @@
                 Object.assign(this, options);
                 return;
             }
-            const {capture, once, passive, signal, nocache, noWarn, timeout, targetIds, urls, useDocumentIds} = options;
+            let {capture, once, passive, signal, nocache, noWarn, timeout, targetIds, urlHandler, urls, useDocumentIds} = options;
             if (typeof capture === 'boolean') this.capture = capture;
             if (typeof once === 'boolean') this.once = once;
             if (typeof passive === 'boolean') this.passive = passive;
@@ -102,7 +109,9 @@
             if (typeof noWarn === 'boolean') this.noWarn = noWarn;
             if (typeof timeout === 'string' && timeout in TurboListenerOptions.#timeouts) this.timeout = timeout; else if (options.noTimeout === true) this.timeout = 'none';
             if (targetIds != null) this.targetIds = normalizeIdsToFlags(targetIds);
-            if (urls != null) this.urls = normalizeToRegExpArray(urls);
+            if (typeof urlHandler === 'function') this.urlHandler = urlHandler;
+            else if (urls != null && (urls = normalizeToRegExpArray(urls)).length > 0)
+                this.urlHandler = url => urls.some(reg => reg.test(url.toString()) && !(reg.lastIndex = 0));
             if (typeof useDocumentIds === 'boolean') this.useDocumentIds = useDocumentIds;
         }
 
@@ -130,7 +139,7 @@
             return this.targetIds == null || id != null && id in this.targetIds || this.useDocumentIds && Object.keys(this.targetIds).some(i => document.getElementById(i));
         }
 
-        #verifyUrl(url) { return !(this.urls?.length > 0) || this.urls.some(reg => reg.test(url) && !(reg.lastIndex = 0)); }
+        #verifyUrl(url) { return this.urlHandler == null || this.urlHandler(url); }
 
         /**
          * Compares this object with another object for equality.
@@ -147,8 +156,8 @@
                 && this.timeout === other.timeout
                 && this.nocache === other.nocache
                 && this.noWarn === other.noWarn
-                && (this.targetIds === other.targetIds || deepEqual(this.targetIds, other.targetIds))
-                && (this.urls === other.urls || deepEqual(this.urls, other.urls)));
+                && this.urlHandler?.toString() === other.urlHandler?.toString()
+                && (this.targetIds === other.targetIds || deepEqual(this.targetIds, other.targetIds)));
         }
 
         /**
