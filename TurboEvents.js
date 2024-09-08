@@ -601,9 +601,10 @@ Press "Cancel" to be reminded again next time.`;
         const common = Object.defineProperties({},{
             /** Collection of location patterns for commonly used pages. */
             locations: {value: Object.defineProperties({}, {
-                    dashboard: {value: /^https:\/\/www\.wanikani\.com(\/dashboard.*)?\/?$/, enumerable: true},
-                    items_pages: {value: /^https:\/\/www\.wanikani\.com\/(radicals|kanji|vocabulary)\/.+\/?$/, enumerable: true},
-                    lessons: {value: /^https:\/\/www\.wanikani\.com\/subject-lessons\/(start|[\d-]+\/\d+)\/?$/, enumerable: true},
+                    dashboard: {value: /^https:\/\/www\.wanikani\.com(?:\/dashboard.*)?\/?$/, enumerable: true},
+                    extra_study: {value: /^https:\/\/www\.wanikani\.com\/subjects\/extra_study\?queue_type=(?:recent_lessons|burned_items)$/, enumerable: true},
+                    items_pages: {value: /^https:\/\/www\.wanikani\.com\/(?:radicals|kanji|vocabulary)\/.+\/?$/, enumerable: true},
+                    lessons: {value: /^https:\/\/www\.wanikani\.com\/subject-lessons\/(?:start|[\d-]+\/\d+)\/?$/, enumerable: true},
                     lessons_picker: {value: /^https:\/\/www\.wanikani\.com\/subject-lessons\/picker\/?$/, enumerable: true},
                     lessons_quiz: {value: /^https:\/\/www\.wanikani\.com\/subject-lessons\/[\d-]+\/quiz.*\/?$/, enumerable: true},
                     reviews: {value: /^https:\/\/www\.wanikani\.com\/subjects\/review.*\/?$/, enumerable: true},
