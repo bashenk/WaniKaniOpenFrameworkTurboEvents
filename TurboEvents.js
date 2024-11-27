@@ -215,7 +215,7 @@
             if (listener === undefined || listener === null || typeof listener !== 'function') return false;
             const listenerOptions = TurboListenerOptions.from(options);
             // noinspection JSUnresolvedReference
-            if (window.Turbo?.session.history.pageLoaded && listenerOptions.noWarn !== true) console.warn(new LateAddListenerWarning(this.name));
+            if (window.Turbo?.session.history.pageLoaded && listenerOptions.noWarn !== true) console.warn((new LateAddListenerWarning(this.name)).message);
             const index = this.#listeners.findIndex(({listener: existingListener, options: existingOptions}) => listener === existingListener && listenerOptions.equals(existingOptions));
             if (index !== -1) return false; // listener already exists.
             return this.#addWrappedListener(listener, listenerOptions);
