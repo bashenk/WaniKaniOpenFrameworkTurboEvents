@@ -248,20 +248,20 @@
                     return;
                 }
                 switch (options.timeout) {
+                    // executes the callback immediately
                     case 'none':
-                        // executes the callback immediately
                         listener(event, url);
                         break;
+                    // creates a microtask to avoid console `[Violation] 'setTimeout' handler took ##ms` messages when the callback takes too long to execute
                     case 'promise':
-                        // creates a microtask to avoid console `[Violation] 'setTimeout' handler took ##ms` messages when the callback takes too long to execute
                         Promise.resolve().then(() => listener(event, url));
                         break;
+                    // creates a microtask within the added macrotask to avoid console `[Violation] 'setTimeout' handler took ##ms` messages when the callback takes too long to execute
                     case 'both':
-                        // creates a microtask within the added macrotask to avoid console `[Violation] 'setTimeout' handler took ##ms` messages when the callback takes too long to execute
                         setTimeout(() => Promise.resolve().then(() => listener(event, url)), 0);
                         break;
+                    // creates a macrotask to let the event settle before invoking the callback
                     case 'setTimeout':
-                        // creates a macrotask to let the event settle before invoking the callback
                     default:
                         setTimeout(() => listener(event, url), 0);
                         break;
