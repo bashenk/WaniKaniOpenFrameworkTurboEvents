@@ -12,6 +12,8 @@
 // @grant       none
 // @supportURL  https://community.wanikani.com/t/x/66725
 // @homepageURL https://github.com/bashenk/WaniKaniOpenFrameworkTurboEvents
+// @downloadURL https://update.greasyfork.org/scripts/501980/Wanikani%20Open%20Framework%20Turbo%20Events.user.js
+// @updateURL   https://update.greasyfork.org/scripts/501980/Wanikani%20Open%20Framework%20Turbo%20Events.meta.js
 // ==/UserScript==
 /* global wkof */
 /* jshint esversion: 11 */
